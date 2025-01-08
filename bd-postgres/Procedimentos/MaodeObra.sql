@@ -1,0 +1,36 @@
+-- Create
+CREATE OR REPLACE PROCEDURE sp_Maodeobra_create(p_NOME_MO TEXT, p_DESC_MO TEXT, p_CUSTO_MO DECIMAL)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO MAODEOBRA(NOME_MO, DESC_MO, CUSTO_MO)
+    VALUES (p_NOME_MO, p_DESC_MO, p_CUSTO_MO);
+    RAISE NOTICE 'Mão de obra criada';
+END;
+$$;
+
+
+
+-- Update
+CREATE OR REPLACE PROCEDURE sp_Maodeobra_update(p_ID_MO INTEGER, p_NOME_MO TEXT, p_DESC_MO TEXT, p_CUSTO_MO DECIMAL)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE MAODEOBRA
+    SET NOME_MO = p_NOME_MO, DESC_MO = p_DESC_MO, CUSTO_MO = p_CUSTO_MO
+    WHERE ID_MO = p_ID_MO;
+    RAISE NOTICE 'Mão de obra atualizada';
+END;
+$$;
+
+-- Delete
+CREATE OR REPLACE PROCEDURE sp_Maodeobra_delete(p_ID_MO INTEGER)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM MAODEOBRA
+    WHERE ID_MO = p_ID_MO;
+    RAISE NOTICE 'Mão de obra eliminada';
+END;
+$$;
+

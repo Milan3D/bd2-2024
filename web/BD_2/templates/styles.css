@@ -1,0 +1,15 @@
+/* Adicione seus estilos personalizados aqui */
+
+.container {
+    margin-top: 50px;
+}
+
+.card {
+    margin-top: 20px;
+}
+
+/* Ajuste o tamanho da imagem conforme necessário */
+.card-img-top {
+    height: 100%;
+    object-fit: cover;
+}

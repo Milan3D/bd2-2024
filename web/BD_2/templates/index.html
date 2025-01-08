@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            margin-top: 20px;
+            background: #f6f9fc;
+        }
+
+        .account-block {
+            padding: 0;
+            background-image: url(https://images.unsplash.com/photo-1672552226650-796f40198c47?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D);
+            background-repeat: no-repeat;
+            background-size: cover;
+            height: 500px;
+            position: relative;
+        }
+
+        .account-block .overlay {
+            -webkit-box-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .account-block .account-testimonial {
+            text-align: center;
+            color: #fff;
+            position: absolute;
+            margin: 0 auto;
+            padding: 0 1.75rem;
+            bottom: 3rem;
+            left: 0;
+            right: 0;
+        }
+
+        .text-theme {
+            color: #5369f8 !important;
+        }
+
+        .btn-theme {
+            background-color: #5369f8;
+            border-color: #5369f8;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="main-wrapper" class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-10">
+                <div class="card border-0">
+                    <div class="card-body p-0">
+                        <div class="row no-gutters">
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="mb-5">
+                                        <h3 class="h4 font-weight-bold text-theme">Login</h3>
+                                    </div>
+
+                                    <form method="post" action="{% url 'login' %}">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="username">Utilizador:</label>
+                                            <input type="text" class="form-control" id="username" name="id_utilpgestao" placeholder="Utilizador" pattern="[0-9]+" title="Apenas números são permitidos">
+                                        </div>
+                                        <div class="form-group mb-5">
+                                            <label for="password">Password:</label>
+                                            <input type="password" class="form-control" id="password" name="password_pgestao" placeholder="Entrar">
+                                        </div>
+                                        <button type="submit" class="btn btn-theme float-right">Entrar</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 d-none d-lg-inline-block">
+                                <div class="account-block rounded-right">
+                                    <div class="overlay rounded-right"></div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <p class="text-muted text-center mt-3 mb-0">Entrar no site para utilizadores <a href="{% url 'login_site_vendas' %}" class="text-primary ml-1"><b>aqui</b></a></p>
+
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

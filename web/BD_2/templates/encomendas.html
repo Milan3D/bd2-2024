@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encomendas</title>
+    <!-- Adicione este link para incluir a biblioteca Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Lista de Encomendas</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Encomenda</th>
+                    <th>ID Guia Compras</th>
+                    <th>Data Encomenda</th>
+                    <th>ID Funcionário</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for encomenda in encomendas %}
+                <tr>
+                    <td>{{ encomenda.ID_ENCOMENDA }}</td>
+                    <td>{{ encomenda.ID_GUIACOMPRAS }}</td>
+                    <td>{{ encomenda.DATA_ENCOMENDA }}</td>
+                    <td>{{ encomenda.ID_FUNCIONARIO }}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteEncomendaModal" onclick="excluirEncomenda({{ encomenda.ID_ENCOMENDA }})">Excluir</button>
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editEncomendaModal" data-id-encomenda="{{ encomenda.ID_ENCOMENDA }}" data-id-guiacompras="{{ encomenda.ID_GUIACOMPRAS }}" data-data-encomenda="{{ encomenda.DATA_ENCOMENDA }}" data-id-funcionario="{{ encomenda.ID_FUNCIONARIO }}">Editar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botão para Adicionar Encomenda -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addEncomendaModal">Adicionar Encomenda</button>
+    </div>
+
+    <!-- Modal para Editar Encomenda -->
+    <div class="modal fade" id="editEncomendaModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Adicione campos do formulário para editar a encomenda conforme necessário -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Encomenda</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="edit_Id_Encomenda" name="edit_Id_Encomenda" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_GuiaCompras">ID da Guia de Compras</label>
+                        <input type="text" class="form-control" id="edit_ID_GuiaCompras" name="edit_ID_GuiaCompras">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Data_Encomenda">Data da Encomenda</label>
+                        <input type="text" class="form-control" id="edit_Data_Encomenda" name="edit_Data_Encomenda">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_Funcionario">ID do Funcionário</label>
+                        <input type="text" class="form-control" id="edit_ID_Funcionario" name="edit_ID_Funcionario">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoEncomenda()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Excluir Encomenda -->
+    <div class="modal fade" id="deleteEncomendaModal" tabindex="-1" role="dialog" aria-labelledby="deleteEncomendaModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteEncomendaModalLabel">Excluir Encomenda</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir esta encomenda?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusaoEncomenda" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Encomenda -->
+    <div class="modal fade" id="addEncomendaModal" tabindex="-1" role="dialog" aria-labelledby="addEncomendaModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEncomendaModalLabel">Adicionar Encomenda</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulário para Adicionar Encomenda -->
+                    <form id="addEncomendaForm" method="post" action="{% url 'adicionar_encomenda' %}">
+                        {% csrf_token %}
+                        <!-- Campos do formulário -->
+                        <div class="form-group">
+                            <label for="id_guiacompras">ID Guia Compras</label>
+                            <input type="text" class="form-control" id="id_guiacompras" name="id_guiacompras" placeholder="Digite o ID Guia Compras">
+                        </div>
+                        <div class="form-group">
+                            <label for="data_encomenda">Data Encomenda</label>
+                            <input type="date" class="form-control" id="data_encomenda" name="data_encomenda">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_funcionario">ID Funcionário</label>
+                            <input type="text" class="form-control" id="id_funcionario" name="id_funcionario" placeholder="Digite o ID Funcionário">
+                        </div>
+                        <!-- Botão de Submissão -->
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+        $('#editEncomendaModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idEncomenda = button.data('id-encomenda');
+            var idGuiaCompras = button.data('id-guiacompras');
+            var dataEncomenda = button.data('data-encomenda');
+            var idFuncionario = button.data('id-funcionario');
+
+            // Preencha os campos do formulário no modal com os dados da encomenda
+            document.getElementById('edit_Id_Encomenda').value = idEncomenda;
+            document.getElementById('edit_ID_GuiaCompras').value = idGuiaCompras;
+            document.getElementById('edit_Data_Encomenda').value = dataEncomenda;
+            document.getElementById('edit_ID_Funcionario').value = idFuncionario;
+        });
+
+        function enviarDadosEdicaoEncomenda() {
+            var idEncomenda = document.getElementById('edit_Id_Encomenda').value;
+            var idGuiaCompras = document.getElementById('edit_ID_GuiaCompras').value;
+            var dataEncomenda = document.getElementById('edit_Data_Encomenda').value;
+            var idFuncionario = document.getElementById('edit_ID_Funcionario').value;
+
+            var dadosEdicao = {
+                idEncomenda: idEncomenda,
+                idGuiaCompras: idGuiaCompras,
+                dataEncomenda: dataEncomenda,
+                idFuncionario: idFuncionario
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_encomenda/' + idEncomenda + '/',
+                data: JSON.stringify(dadosEdicao),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    console.log('Dados enviados com sucesso para a view de edição:', response);
+                    $('#editEncomendaModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados para a view de edição:', error);
+                }
+            });
+        }
+
+        function excluirEncomenda(encomendaId) {
+            var linkExclusao = '/eliminar_encomenda/' + encomendaId + '/';
+            document.getElementById('linkExclusaoEncomenda').href = linkExclusao;
+
+            $('#deleteEncomendaModal').modal('show');
+        }
+    </script>
+</body>
+</html>

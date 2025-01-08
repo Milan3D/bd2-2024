@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipos de Equipamentos</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Tipos de Equipamentos</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Tipo Equipamento</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tipoequipamento in tipoequipamentos %}
+                <tr>
+                    <td>{{ tipoequipamento.ID_TIPOEQUIP }}</td>
+                    <td>{{ tipoequipamento.nome }}</td>
+                    <td>{{ tipoequipamento.descricao }}</td>
+                    <td>
+                        {% if tem_permissao %}
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                            data-target="#editTipoEquipamentoModal" data-id-tipoequip="{{ tipoequipamento.ID_TIPOEQUIP }}"
+                            data-nome-tipoequip="{{ tipoequipamento.nome }}"
+                            data-desc-tipoequip="{{ tipoequipamento.descricao }}">Editar</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#deleteTipoEquipamentoModal"
+                            onclick="excluirTipoEquipamento('{{ tipoequipamento.ID_TIPOEQUIP }}')">Excluir</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if tem_permissao %}
+        <button class="btn btn-success" data-toggle="modal" data-target="#addTipoEquipamentoModal">Adicionar Tipo de
+            Equipamento</button>
+        {% endif %}
+    </div>
+
+    <!-- Modal para Editar Tipo de Equipamento -->
+    <div class="modal fade" id="editTipoEquipamentoModal" tabindex="-1" role="dialog"
+        aria-labelledby="editTipoEquipamentoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTipoEquipamentoModalLabel">Editar Tipo de Equipamento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="edit_Id_TipoEquip" name="edit_Id_TipoEquip" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Nome_TipoEquip">Nome do Tipo de Equipamento</label>
+                        <input type="text" class="form-control" id="edit_Nome_TipoEquip" name="edit_Nome_TipoEquip">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Desc_TipoEquip">Descrição do Tipo de Equipamento</label>
+                        <textarea class="form-control" id="edit_Desc_TipoEquip" name="edit_Desc_TipoEquip"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary"
+                        onclick="enviarDadosEdicaoTipoEquipamento()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Excluir Tipo de Equipamento -->
+    <div class="modal fade" id="deleteTipoEquipamentoModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteTipoEquipamentoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteTipoEquipamentoModalLabel">Excluir Tipo de Equipamento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este tipo de equipamento?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusaoTipoEquipamento" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Tipo de Equipamento -->
+    <div class="modal fade" id="addTipoEquipamentoModal" tabindex="-1" role="dialog"
+        aria-labelledby="addTipoEquipamentoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTipoEquipamentoModalLabel">Adicionar Tipo de Equipamento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addTipoEquipamentoForm" method="post" action="{% url 'adicionar_tipoequipamento' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="nome_tipoequip">Nome do Tipo de Equipamento</label>
+                            <input type="text" class="form-control" id="nome_tipoequip" name="nome_tipoequip"
+                                placeholder="Digite o nome do tipo de equipamento">
+                        </div>
+                        <div class="form-group">
+                            <label for="desc_tipoequip">Descrição do Tipo de Equipamento</label>
+                            <textarea class="form-control" id="desc_tipoequip" name="desc_tipoequip"
+                                placeholder="Digite a descrição do tipo de equipamento"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-u83SgbVbo5Gzy0tczQoW5IYr7/j7Q2+Lkb1S/Ygwo2VrH6QkhDaRqG61tmnOHLq"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script>
+        $('#editTipoEquipamentoModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idTipoEquipamento = button.data('id-tipoequip');
+            var nomeTipoEquipamento = button.data('nome-tipoequip');
+            var descTipoEquipamento = button.data('desc-tipoequip');
+
+            document.getElementById('edit_Id_TipoEquip').value = idTipoEquipamento;
+            document.getElementById('edit_Nome_TipoEquip').value = nomeTipoEquipamento;
+            document.getElementById('edit_Desc_TipoEquip').value = descTipoEquipamento;
+        });
+
+        function enviarDadosEdicaoTipoEquipamento() {
+            var idTipoEquipamento = document.getElementById('edit_Id_TipoEquip').value;
+            var nomeTipoEquipamento = document.getElementById('edit_Nome_TipoEquip').value;
+            var descTipoEquipamento = document.getElementById('edit_Desc_TipoEquip').value;
+
+            var dadosEdicaoTipoEquipamento = {
+                nomeTipoEquipamento: nomeTipoEquipamento,
+                descTipoEquipamento: descTipoEquipamento
+            };
+
+            console.log('Dados de edição do tipo de equipamento:', dadosEdicaoTipoEquipamento);
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_tipoequipamento/' + idTipoEquipamento + '/',
+                data: JSON.stringify(dadosEdicaoTipoEquipamento),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    console.log('Dados enviados com sucesso para a view de edição:', response);
+                    $('#editTipoEquipamentoModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados para a view de edição:', error);
+                }
+            });
+        }
+
+        function excluirTipoEquipamento(idTipoEquipamento) {
+            var linkExclusaoTipoEquipamento = '/eliminar_tipoequipamento/' + idTipoEquipamento + '/';
+            document.getElementById('linkExclusaoTipoEquipamento').href = linkExclusaoTipoEquipamento;
+            $('#deleteTipoEquipamentoModal').modal('show');
+        }
+    </script>
+</body>
+
+</html>

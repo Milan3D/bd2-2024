@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Encomenda</title>
+    <!-- Adicione o link para o Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    
+    {% include 'navbar.html' %}
+
+    <div class="container mt-4">
+        <h2>Detalhes da Encomenda</h2>
+
+        <!-- Placeholder content for order details -->
+        <div>
+            <p>Número da Encomenda: <span id="orderNumber"></span></p>
+            <p>Data da Encomenda: <span id="orderDate"></span></p>
+            <p>Total: <span id="orderTotal"></span></p>
+            <p>Status: <span id="orderStatus"></span></p>
+            <!-- Add more details as needed -->
+        </div>
+    </div>
+
+    <!-- Adicione o link para o Bootstrap JS e o jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <script>
+        // Function to fetch order details based on the ID from the URL
+        function fetchOrderDetails() {
+            // Get the order ID from the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('id');
+
+            // Fetch order details from your server or API
+            // Replace the following with your actual logic to fetch order details
+            const orderDetails = {
+                orderNumber: '12345',
+                orderDate: '2023-01-01',
+                orderTotal: '$100.00',
+                orderStatus: 'Entregue'
+                // Add more details as needed
+            };
+
+            // Update the HTML with fetched order details
+            document.getElementById('orderNumber').innerText = orderDetails.orderNumber;
+            document.getElementById('orderDate').innerText = orderDetails.orderDate;
+            document.getElementById('orderTotal').innerText = orderDetails.orderTotal;
+            document.getElementById('orderStatus').innerText = orderDetails.orderStatus;
+            // Update more elements as needed
+        }
+
+        // Call the function when the page loads
+        window.onload = fetchOrderDetails;
+    </script>
+
+</body>
+</html>

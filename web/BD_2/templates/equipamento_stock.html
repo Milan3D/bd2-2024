@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estoque de Equipamentos</title>
+    <!-- Adicione este link para incluir a biblioteca Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {%include 'navbar.html'%}
+
+    <div class="container mt-5">
+        <h2>Lista de Estoque de Equipamentos</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Armazém</th>
+                    <th>ID Equipamento</th>
+                    <th>Quantidade em Estoque</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for estoque in stock_equipamentos %}
+                <tr>
+                    <td>{{ estoque.ID_ARMAZEM }}</td>
+                    <td>{{ estoque.ID_EQUIP }}</td>
+                    <td>{{ estoque.QUANTIDADE_STOCKEQUIP }}</td>
+                    <td>
+                        {% if tem_permissao %}
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                            data-target="#editEstoqueModal" data-id-armazem="{{ estoque.ID_ARMAZEM }}"
+                            data-id-equip="{{ estoque.ID_EQUIP }}"
+                            data-quantidade="{{ estoque.QUANTIDADE_STOCKEQUIP }}">Editar</button>
+                        <button type="button" class="btn btn-danger btn-sm"
+                            onclick="excluirEstoque({{ estoque.ID_ARMAZEM }}, {{ estoque.ID_EQUIP }})">Excluir</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if tem_permissao %}
+        <!-- Botão para Adicionar Estoque de Equipamento -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addEstoqueModal">Adicionar Estoque de
+            Equipamento</button>
+        {% endif %}
+    </div>
+
+    <!-- Modal para Editar Estoque de Equipamento -->
+    <div class="modal fade" id="editEstoqueModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Estoque de Equipamento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_ID_Armazem">ID Armazém</label>
+                        <input type="text" class="form-control" id="edit_ID_Armazem" name="edit_ID_Armazem" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_Equip">ID Equipamento</label>
+                        <input type="text" class="form-control" id="edit_ID_Equip" name="edit_ID_Equip" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Quantidade_Estoque">Quantidade em Estoque</label>
+                        <input type="text" class="form-control" id="edit_Quantidade_Estoque" name="edit_Quantidade_Estoque">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoEstoque()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal para Excluir Estoque de Equipamento -->
+    <div class="modal fade" id="deleteEstoqueModal" tabindex="-1" role="dialog" aria-labelledby="deleteEstoqueModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteEstoqueModalLabel">Excluir Estoque de Equipamento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este estoque de equipamento?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusaoEstoque" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal para Adicionar Estoque de Equipamento -->
+    <div class="modal fade" id="addEstoqueModal" tabindex="-1" role="dialog" aria-labelledby="addEstoqueModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEstoqueModalLabel">Adicionar Estoque de Equipamento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulário para Adicionar Estoque de Equipamento -->
+                    <form id="addEstoqueForm" method="post" action="{% url 'adicionar_stock_equipamento' %}">
+                        {% csrf_token %}
+                        <!-- Campos do formulário -->
+                        <div class="form-group">
+                            <label for="id_armazem">ID Armazém</label>
+                            <input type="text" class="form-control" id="id_armazem" name="id_armazem"
+                                placeholder="Digite o ID do Armazém">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_equip">ID Equipamento</label>
+                            <input type="text" class="form-control" id="id_equip" name="id_equip"
+                                placeholder="Digite o ID do Equipamento">
+                        </div>
+                        <div class="form-group">
+                            <label for="quantidade_stockequip">Quantidade em Estoque</label>
+                            <input type="text" class="form-control" id="quantidade_stockequip" name="quantidade_stockequip"
+                                placeholder="Digite a quantidade em estoque">
+                        </div>
+    
+                        <!-- Botão de Submissão -->
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seus scripts JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+        $('#editEstoqueModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idArmazem = button.data('id-armazem');
+            var idEquip = button.data('id-equip');
+            var quantidadeEstoque = button.data('quantidade');
+
+            // Preencha os campos do formulário no modal com os dados do estoque
+            document.getElementById('edit_ID_Armazem').value = idArmazem;
+            document.getElementById('edit_ID_Equip').value = idEquip;
+            document.getElementById('edit_Quantidade_Estoque').value = quantidadeEstoque;
+        });
+
+        function enviarDadosEdicaoEstoque() {
+            var idArmazem = document.getElementById('edit_ID_Armazem').value;
+            var idEquip = document.getElementById('edit_ID_Equip').value;
+            var quantidadeEstoque = document.getElementById('edit_Quantidade_Estoque').value;
+
+            var dadosEdicao = {
+                id_armazem: idArmazem,
+                id_equip: idEquip,
+                quantidadeStockequip: quantidadeEstoque  // Usando a mesma chave esperada na view
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_stock_equipamento/' + idArmazem + '/' + idEquip + '/',
+                data: JSON.stringify(dadosEdicao),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    console.log('Dados enviados com sucesso para a view de edição:', response);
+                    $('#editEstoqueModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados para a view de edição:', error);
+                }
+            });
+        }
+
+
+        function excluirEstoque(idArmazem, idEquip) {
+            console.log('Excluindo estoque de equipamento:', idArmazem, idEquip);
+            var linkExclusaoEstoque = '/excluir_stock_equipamento/' + idArmazem + '/' + idEquip + '/';
+            document.getElementById('linkExclusaoEstoque').href = linkExclusaoEstoque;
+
+            $('#deleteEstoqueModal').modal('show');
+        }
+    </script>
+
+</body>
+
+</html>

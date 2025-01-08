@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fornecedores</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- Navbar -->
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Fornecedores</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Fornecedor</th>
+                    <th>Nome</th>
+                    <th>Morada</th>
+                    <th>Email</th>
+                    <th>Contacto</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fornecedor in fornecedores %}
+                <tr>
+                    <td>{{ fornecedor.ID_FORNECEDOR }}</td>
+                    <td>{{ fornecedor.NOME_FORNECEDOR }}</td>
+                    <td>{{ fornecedor.MORADA_FORNECEDOR }}</td>
+                    <td>{{ fornecedor.EMAIL_FORNECEDOR }}</td>
+                    <td>{{ fornecedor.CONTACTO_FORNECEDOR }}</td>
+                    <td>
+                        {% if tem_permissao %}
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                            data-target="#editFornecedorModal" data-id-fornecedor="{{ fornecedor.ID_FORNECEDOR }}"
+                            data-nome-fornecedor="{{ fornecedor.NOME_FORNECEDOR }}"
+                            data-morada-fornecedor="{{ fornecedor.MORADA_FORNECEDOR }}"
+                            data-email-fornecedor="{{ fornecedor.EMAIL_FORNECEDOR }}"
+                            data-contacto-fornecedor="{{ fornecedor.CONTACTO_FORNECEDOR }}">Editar</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#deleteFornecedorModal"
+                            onclick="excluirFornecedor('{{ fornecedor.ID_FORNECEDOR }}')">Excluir</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if tem_permissao %}
+        <button class="btn btn-success" data-toggle="modal" data-target="#addFornecedorModal">Adicionar
+            Fornecedor</button>
+        {% endif %}
+    </div>
+
+    <!-- Modal para Editar Fornecedor -->
+    <div class="modal fade" id="editFornecedorModal" tabindex="-1" role="dialog" aria-labelledby="editFornecedorModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editFornecedorModalLabel">Editar Fornecedor</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <input type="hidden" class="form-control" id="edit_Id_Fornecedor" name="edit_Id_Fornecedor"
+                                readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_Nome_Fornecedor">Nome do Fornecedor</label>
+                            <input type="text" class="form-control" id="edit_Nome_Fornecedor" name="edit_Nome_Fornecedor">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_Morada_Fornecedor">Morada do Fornecedor</label>
+                            <input type="text" class="form-control" id="edit_Morada_Fornecedor"
+                                name="edit_Morada_Fornecedor">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_Email_Fornecedor">Email do Fornecedor</label>
+                            <input type="email" class="form-control" id="edit_Email_Fornecedor"
+                                name="edit_Email_Fornecedor">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_Contacto_Fornecedor">Contacto do Fornecedor</label>
+                            <input type="text" class="form-control" id="edit_Contacto_Fornecedor"
+                                name="edit_Contacto_Fornecedor">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoFornecedor()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Excluir Fornecedor -->
+    <div class="modal fade" id="deleteFornecedorModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteFornecedorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFornecedorModalLabel">Excluir Fornecedor</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este fornecedor?</p>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Adicionar Fornecedor -->
+    <div class="modal fade" id="addFornecedorModal" tabindex="-1" role="dialog" aria-labelledby="addFornecedorModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addFornecedorModalLabel">Adicionar Fornecedor</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addFornecedorForm" method="post" action="{% url 'adicionar_fornecedor' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="nome_fornecedor">Nome do Fornecedor</label>
+                            <input type="text" class="form-control" id="nome_fornecedor" name="nome_fornecedor"
+                                placeholder="Digite o nome do fornecedor">
+                        </div>
+                        <div class="form-group">
+                            <label for="morada_fornecedor">Morada do Fornecedor</label>
+                            <input type="text" class="form-control" id="morada_fornecedor" name="morada_fornecedor"
+                                placeholder="Digite a morada do fornecedor">
+                        </div>
+                        <div class="form-group">
+                            <label for="email_fornecedor">Email do Fornecedor</label>
+                            <input type="email" class="form-control" id="email_fornecedor" name="email_fornecedor"
+                                placeholder="Digite o email do fornecedor">
+                        </div>
+                        <div class="form-group">
+                            <label for="contacto_fornecedor">Contacto do Fornecedor</label>
+                            <input type="text" class="form-control" id="contacto_fornecedor" name="contacto_fornecedor"
+                                placeholder="Digite o contacto do fornecedor">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-u83SgbVbo5Gzy0tczQoW5IYr7/j7Q2+Lkb1S/Ygwo2VrH6QkhDaRqG61tmnOHLq"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script>
+        // Script para preencher os campos do modal de edição com os dados do fornecedor selecionado
+        $('#editFornecedorModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idFornecedor = button.data('id-fornecedor');
+            var nomeFornecedor = button.data('nome-fornecedor');
+            var moradaFornecedor = button.data('morada-fornecedor');
+            var emailFornecedor = button.data('email-fornecedor');
+            var contactoFornecedor = button.data('contacto-fornecedor');
+
+            // Preencher os campos do formulário com os dados do fornecedor
+            $(this).find('.modal-body #edit_Id_Fornecedor').val(idFornecedor);
+            $(this).find('.modal-body #edit_Nome_Fornecedor').val(nomeFornecedor);
+            $(this).find('.modal-body #edit_Morada_Fornecedor').val(moradaFornecedor);
+            $(this).find('.modal-body #edit_Email_Fornecedor').val(emailFornecedor);
+            $(this).find('.modal-body #edit_Contacto_Fornecedor').val(contactoFornecedor);
+        });
+
+        // Função para enviar os dados de edição do fornecedor
+        function enviarDadosEdicaoFornecedor() {
+            var idFornecedor = $('#edit_Id_Fornecedor').val();
+            var nomeFornecedor = $('#edit_Nome_Fornecedor').val();
+            var moradaFornecedor = $('#edit_Morada_Fornecedor').val();
+            var emailFornecedor = $('#edit_Email_Fornecedor').val();
+            var contactoFornecedor = $('#edit_Contacto_Fornecedor').val();
+
+          // Verificar se o contacto do fornecedor tem 9 dígitos
+            if (contactoFornecedor.length !== 9) {
+                alert('O contacto do fornecedor deve ter 9 dígitos.');
+                return;
+            }
+
+            // Dados a serem enviados para a view de edição
+            var dadosEdicaoFornecedor = {
+                idFornecedor: idFornecedor,
+                nomeFornecedor: nomeFornecedor,
+                moradaFornecedor: moradaFornecedor,
+                emailFornecedor: emailFornecedor,
+                contactoFornecedor: contactoFornecedor
+            };
+
+            console.log('Dados a serem enviados para a view de edição:', dadosEdicaoFornecedor);
+
+            // Requisição AJAX para a view de edição
+            $.ajax({
+                type: 'POST',
+                url: '/editar_fornecedor/' + idFornecedor + '/',
+                data: JSON.stringify(dadosEdicaoFornecedor),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    console.log('Dados enviados com sucesso para a view de edição:', response);
+                    $('#editFornecedorModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados para a view de edição:', error);
+                }
+            });
+        }
+
+        // Função para excluir um fornecedor
+        function excluirFornecedor(idFornecedor) {
+            // Definir o link de exclusão com o ID do fornecedor
+            var linkExclusaoFornecedor = '/excluir_fornecedor/' + idFornecedor + '/';
+            // Atualizar o link do botão de exclusão no modal
+            $('#deleteFornecedorModal').find('.modal-footer a.btn-danger').attr('href', linkExclusaoFornecedor);
+            // Exibir o modal de exclusão
+            $('#deleteFornecedorModal').modal('show');
+        }
+    </script>
+</body>
+
+</html>

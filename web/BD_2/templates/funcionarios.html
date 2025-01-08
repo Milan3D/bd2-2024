@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funcionários</title>
+    <!-- Adicione este link para incluir a biblioteca Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container mt-5">
+        <h2>Lista de Funcionários</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Funcionário</th>
+                    <th>Nome</th>
+                    <th>Data de Nascimento</th>
+                    <th>NIF</th>
+                    <th>Email</th>
+                    <th>Contacto</th>
+                    <th>Morada</th>
+                    <th>Cargo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for funcionario in funcionarios %}
+                <tr>
+                    <td>{{ funcionario.ID_FUNCIONARIO }}</td>
+                    <td>{{ funcionario.NOME }}</td>
+                    <td>{{ funcionario.DATANASC }}</td>
+                    <td>{{ funcionario.NIF }}</td>
+                    <td>{{ funcionario.EMAIL }}</td>
+                    <td>{{ funcionario.CONTACTO }}</td>
+                    <td>{{ funcionario.MORADA }}</td>
+                    <td>{{ funcionario.CARGO }}</td>
+                    <td>
+                        {% if tem_permissao %}
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                                data-target="#deleteFuncionarioModal"
+                                onclick="excluirFuncionario({{ funcionario.ID_FUNCIONARIO }})">Excluir</button>
+                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                                data-target="#editFuncionarioModal"
+                                data-id-funcionario="{{ funcionario.ID_FUNCIONARIO }}"
+                                data-nome="{{ funcionario.NOME }}"
+                                data-datanasc="{{ funcionario.DATANASC }}"
+                                data-nif="{{ funcionario.NIF }}"
+                                data-email="{{ funcionario.EMAIL }}"
+                                data-contacto="{{ funcionario.CONTACTO }}"
+                                data-morada="{{ funcionario.MORADA }}"
+                                data-cargo="{{ funcionario.CARGO }}">Editar</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if tem_permissao %}
+        <!-- Botão para Adicionar Funcionário -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addFuncionarioModal">Adicionar Funcionário</button>
+        {% endif %}
+    </div>
+    <!-- Modal para Editar Funcionário -->
+    <div class="modal fade" id="editFuncionarioModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Adicione campos do formulário para editar o funcionário conforme necessário -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Funcionário</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="edit_Id_Funcionario" name="edit_Id_Funcionario" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Nome">Nome</label>
+                        <input type="text" class="form-control" id="edit_Nome" name="edit_Nome">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Datanasc">Data de Nascimento</label>
+                        <input type="date" class="form-control" id="edit_Datanasc" name="edit_Datanasc">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Nif">NIF</label>
+                        <input type="text" class="form-control" id="edit_Nif" name="edit_Nif">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Email">Email</label>
+                        <input type="email" class="form-control" id="edit_Email" name="edit_Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Contacto">Contacto</label>
+                        <input type="text" class="form-control" id="edit_Contacto" name="edit_Contacto">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Morada">Morada</label>
+                        <input type="text" class="form-control" id="edit_Morada" name="edit_Morada">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Cargo">Cargo</label>
+                        <input type="text" class="form-control" id="edit_Cargo" name="edit_Cargo">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary"
+                        onclick="enviarDadosEdicaoFuncionario()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal para Excluir Funcionário -->
+    <div class="modal fade" id="deleteFuncionarioModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteFuncionarioModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFuncionarioModalLabel">Excluir Funcionário</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este funcionário?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusao" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal para Adicionar Funcionário -->
+    <div class="modal fade" id="addFuncionarioModal" tabindex="-1" role="dialog"
+        aria-labelledby="addFuncionarioModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addFuncionarioModalLabel">Adicionar Funcionário</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulário para Adicionar Funcionário -->
+                    <form id="addFuncionarioForm" method="post" action="{% url 'adicionar_funcionario' %}">
+                        {% csrf_token %}
+                        <!-- Campos do formulário -->
+                        <div class="form-group">
+                            <label for="nome">Nome</label>
+                            <input type="text" class="form-control" id="nome" name="nome"
+                                placeholder="Digite o nome">
+                        </div>
+                        <div class="form-group">
+                            <label for="datanasc">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="datanasc" name="datanasc">
+                        </div>
+                        <div class="form-group">
+                            <label for="nif">NIF</label>
+                            <input type="text" class="form-control" id="nif" name="nif"
+                                placeholder="Digite o NIF">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email"
+                                placeholder="Digite o email">
+                        </div>
+                        <div class="form-group">
+                            <label for="contacto">Contacto</label>
+                            <input type="text" class="form-control" id="contacto" name="contacto"
+                                placeholder="Digite o contacto">
+                        </div>
+                        <div class="form-group">
+                            <label for="morada">Morada</label>
+                            <input type="text" class="form-control" id="morada" name="morada"
+                                placeholder="Digite a morada">
+                        </div>
+                        <div class="form-group">
+                            <label for="cargo">Cargo</label>
+                            <input type="text" class="form-control" id="cargo" name="cargo"
+                                placeholder="Digite o cargo">
+                        </div>
+                        <!-- Botão de Submissão -->
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script>
+        $('#editFuncionarioModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idFuncionario = button.data('id-funcionario');
+            var nome = button.data('nome');
+            var datanasc = button.data('datanasc');
+            var nif = button.data('nif');
+            var email = button.data('email');
+            var contacto = button.data('contacto');
+            var morada = button.data('morada');
+            var cargo = button.data('cargo');
+            // Preencha os campos do formulário no modal com os dados do funcionário
+            document.getElementById('edit_Id_Funcionario').value = idFuncionario;
+            document.getElementById('edit_Nome').value = nome;
+            document.getElementById('edit_Datanasc').value = datanasc;
+            document.getElementById('edit_Nif').value = nif;
+            document.getElementById('edit_Email').value = email;
+            document.getElementById('edit_Contacto').value = contacto;
+            document.getElementById('edit_Morada').value = morada;
+            document.getElementById('edit_Cargo').value = cargo;
+        });
+        function enviarDadosEdicaoFuncionario() {
+            var idFuncionario = document.getElementById('edit_Id_Funcionario').value;
+            var nome = document.getElementById('edit_Nome').value;
+            var datanasc = document.getElementById('edit_Datanasc').value;
+            var nif = document.getElementById('edit_Nif').value;
+            var email = document.getElementById('edit_Email').value;
+            var contacto = document.getElementById('edit_Contacto').value;
+            var morada = document.getElementById('edit_Morada').value;
+            var cargo = document.getElementById('edit_Cargo').value;
+            var dadosEdicao = {
+                idFuncionario: idFuncionario,
+                nome: nome,
+                datanasc: datanasc,
+                nif: nif,
+                email: email,
+                contacto: contacto,
+                morada: morada,
+                cargo: cargo
+            };
+            $.ajax({
+                type: 'POST',
+                url: '/editar_funcionario/' + idFuncionario + '/',
+                data: JSON.stringify(dadosEdicao),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    console.log('Dados enviados com sucesso para a view de edição:', response);
+                    $('#editFuncionarioModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados para a view de edição:', error);
+                }
+            });
+        }
+        function excluirFuncionario(funcionarioId) {
+            var linkExclusao = '/excluir_funcionario/' + funcionarioId + '/';
+            document.getElementById('linkExclusao').href = linkExclusao;
+            $('#deleteFuncionarioModal').modal('show');
+        }
+    </script>
+</body>
+</html>

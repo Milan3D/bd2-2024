@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotes</title>
+    <!-- Include the Bootstrap library -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Lista de Lotes</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Lote</th>
+                    <th>ID Produção</th>
+                    <th>ID TipoEquip</th>
+                    <th>Quantidade Produtos</th>
+                    <th>ID Armazém</th>
+                    <th>ID Funcionário</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lote in lotes %}
+                <tr>
+                    <td>{{ lote.ID_LOTE }}</td>
+                    <td>{{ lote.ID_PRODUCAO }}</td>
+                    <td>{{ lote.ID_TIPOEQUIP }}</td>
+                    <td>{{ lote.QUANTIDADE_PRODUTOS }}</td>
+                    <td>{{ lote.ID_ARMAZEM }}</td>
+                    <td>{{ lote.ID_FUNCIONARIO }}</td>
+                    <td>
+                        {% if tem_permissao %}
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#deleteLoteModal" onclick="excluirLote({{ lote.ID_LOTE }})">Excluir</button>
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                            data-target="#editLoteModal" data-id-lote="{{ lote.ID_LOTE }}"
+                            data-id-producao="{{ lote.ID_PRODUCAO }}" data-id-tipo-equip="{{ lote.ID_TIPOEQUIP }}"
+                            data-quantidade-produtos="{{ lote.QUANTIDADE_PRODUTOS }}"
+                            data-id-armazem="{{ lote.ID_ARMAZEM }}"
+                            data-id-funcionario="{{ lote.ID_FUNCIONARIO }}">Editar</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if tem_permissao %}
+        <!-- Button to Add Lote -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addLoteModal">Adicionar Lote</button>
+        {% endif %}
+    </div>
+
+    <!-- Modal to Edit Lote -->
+    <div class="modal fade" id="editLoteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Fields for editing the Lote as needed -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Lote</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form fields for editing Lote -->
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="edit_Id_Lote" name="edit_Id_Lote" readonly>
+                    </div>
+                    <div class="form-group">
+                        <!-- Adicione o campo id_producao -->
+                        <label for="edit_ID_Producao">Id de Produção</label>
+                        <input type="text" class="form-control" id="edit_ID_Producao" name="edit_ID_Producao" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_tipoEquip">Id do Tipo de Equipamento</label>
+                        <input type="text" class="form-control" id="edit_ID_tipoEquip" name="edit_ID_tipoEquip">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Quantidade_Produtos">Quantidade de Produtos</label>
+                        <input type="text" class="form-control" id="edit_Quantidade_Produtos"
+                            name="edit_Quantidade_Produtos">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_Armazem">Id do Armazém</label>
+                        <input type="text" class="form-control" id="edit_ID_Armazem" name="edit_ID_Armazem">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_Funcionario">Id do Funcionário</label>
+                        <input type="text" class="form-control" id="edit_ID_Funcionario" name="edit_ID_Funcionario">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoLote()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal to Delete Lote -->
+    <div class="modal fade" id="deleteLoteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteLoteModalLabel">Excluir Lote</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este lote?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusaoLote" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal to Add Lote -->
+    <div class="modal fade" id="addLoteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addLoteModalLabel">Adicionar Lote</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'adicionar_lote' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="add_ID_Producao">Id de Produção</label>
+                            <input type="text" class="form-control" id="add_ID_Producao" name="add_ID_Producao">
+                        </div>
+                        <div class="form-group">
+                            <label for="add_ID_tipoEquip">Id do Tipo de Equipamento</label>
+                            <input type="text" class="form-control" id="add_ID_tipoEquip" name="add_ID_tipoEquip">
+                        </div>
+                        <div class="form-group">
+                            <label for="add_Quantidade_Produtos">Quantidade de Produtos</label>
+                            <input type="text" class="form-control" id="add_Quantidade_Produtos"
+                                name="add_Quantidade_Produtos">
+                        </div>
+                        <div class="form-group">
+                            <label for="add_ID_Armazem">Id do Armazém</label>
+                            <input type="text" class="form-control" id="add_ID_Armazem" name="add_ID_Armazem">
+                        </div>
+                        <div class="form-group">
+                            <label for="add_ID_Funcionario">Id do Funcionário</label>
+                            <input type="text" class="form-control" id="add_ID_Funcionario" name="add_ID_Funcionario">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include jQuery and Bootstrap JS libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <!-- Custom JavaScript for handling modals -->
+    <script>
+        $('#editLoteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idLote = button.data('id-lote');
+            var idProducao = button.data('id-producao');
+            var idTipoEquip = button.data('id-tipo-equip');
+            var quantidadeProdutos = button.data('quantidade-produtos');
+            var idArmazem = button.data('id-armazem');
+            var idFuncionario = button.data('id-funcionario');
+
+            var modal = $(this);
+            modal.find('.modal-body #edit_Id_Lote').val(idLote);
+            modal.find('.modal-body #edit_ID_Producao').val(idProducao);
+            modal.find('.modal-body #edit_ID_tipoEquip').val(idTipoEquip);
+            modal.find('.modal-body #edit_Quantidade_Produtos').val(quantidadeProdutos);
+            modal.find('.modal-body #edit_ID_Armazem').val(idArmazem);
+            modal.find('.modal-body #edit_ID_Funcionario').val(idFuncionario);
+        });
+
+    function enviarDadosEdicaoLote() {
+            var idLote = $('#edit_Id_Lote').val();
+            var idProducao = $('#edit_ID_Producao').val();
+            var idTipoEquip = $('#edit_ID_tipoEquip').val();
+            var quantidadeProdutos = $('#edit_Quantidade_Produtos').val();
+            var idArmazem = $('#edit_ID_Armazem').val();
+            var idFuncionario = $('#edit_ID_Funcionario').val();
+
+            var dadosEdicao = {
+                'id_producao': idProducao,
+                'id_tipoEquip': idTipoEquip,
+                'quantidade_produtos': quantidadeProdutos,
+                'id_armazem': idArmazem,
+                'id_funcionario': idFuncionario
+            };
+
+            console.log('Enviando dados de edição: ' + JSON.stringify(dadosEdicao));
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_lote/' + idLote + '/',
+                data: dadosEdicao,  // Remova o JSON.stringify
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                },
+                success: function (response) {
+                    console.log('Resposta do servidor: ' + response);
+                    $('#editLoteModal').modal('hide');
+                },
+                error: function (response) {
+                    console.error('Erro ao editar lote: ' + response);
+                    $('#editLoteModal').modal('hide');
+                }
+            });
+
+            // Feche o modal após o envio
+            $('#editLoteModal').modal('hide');
+        }
+
+        function excluirLote(loteId) {
+            console.log('Excluir lote com ID ' + loteId);
+            if (loteId == null) {
+                console.error('ID do lote não pode ser nulo');
+                return;
+            }
+
+            var linkExclusao = '/eliminar_lote/' + loteId;
+            $('#linkExclusaoLote').attr('href', linkExclusao);
+        }
+
+        function enviarDadosAdicaoLote() {
+            var idProducao = $('#add_ID_Producao').val();
+            var idTipoEquip = $('#add_ID_tipoEquip').val();
+            var quantidadeProdutos = $('#add_Quantidade_Produtos').val();
+            var idArmazem = $('#add_ID_Armazem').val();
+            var idFuncionario = $('#add_ID_Funcionario').val();
+
+            // Feche o modal após o envio
+            $('#addLoteModal').modal('hide');
+        }
+    </script>
+
+</body>
+
+</html>

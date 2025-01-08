@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mão de Obra</title>
+    <!-- Adicione este link para incluir a biblioteca Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+</head>
+<body>
+{% include 'navbar.html' %}
+<div class="container mt-5">
+    <h2>Lista de Mão de Obra</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID Mão de Obra</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Custo</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for maodeobra in maodeobras %}
+        <tr>
+            <td>{{ maodeobra.ID_MO }}</td>
+            <td>{{ maodeobra.NOME_MO }}</td>
+            <td>{{ maodeobra.DESC_MO }}</td>
+            <td>{{ maodeobra.CUSTO_MO }}</td>
+            <td>
+                {% if tem_permissao %}
+                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                        data-target="#deleteMaodeObraModal" onclick="excluirMaodeObra({{ maodeobra.ID_MO }})">Excluir
+                </button>
+                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                        data-target="#editMaodeObraModal" data-id-maodeobra="{{ maodeobra.ID_MO }}"
+                        data-nome-maodeobra="{{ maodeobra.NOME_MO }}" data-desc-maodeobra="{{ maodeobra.DESC_MO }}"
+                        data-custo-maodeobra="{{ maodeobra.CUSTO_MO }}">Editar
+                </button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if tem_permissao %}
+    <!-- Botão para Adicionar Mão de Obra -->
+    <button class="btn btn-success" data-toggle="modal" data-target="#addMaodeObraModal">Adicionar Mão de Obra</button>
+    {% endif %}
+</div>
+
+<!-- Modal para Editar Mão de Obra -->
+<div class="modal fade" id="editMaodeObraModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <!-- Adicione campos do formulário para editar a mão de obra conforme necessário -->
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Mão de Obra</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" class="form-control" id="edit_Id_MaodeObra" name="edit_Id_MaodeObra" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="edit_Nome_MaodeObra">Nome</label>
+                    <input type="text" class="form-control" id="edit_Nome_MaodeObra" name="edit_Nome_MaodeObra">
+                </div>
+                <div class="form-group">
+                    <label for="edit_Desc_MaodeObra">Descrição</label>
+                    <textarea class="form-control" id="edit_Desc_MaodeObra" name="edit_Desc_MaodeObra"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit_Custo_MaodeObra">Custo</label>
+                    <input type="text" class="form-control" id="edit_Custo_MaodeObra" name="edit_Custo_MaodeObra">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoMaodeObra()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Excluir Mão de Obra -->
+<div class="modal fade" id="deleteMaodeObraModal" tabindex="-1" role="dialog"
+     aria-labelledby="deleteMaodeObraModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteMaodeObraModalLabel">Excluir Mão de Obra</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza de que deseja excluir esta Mão de Obra?</p>
+            </div>
+            <div class="modal-footer">
+                <a id="linkExclusaoMaodeObra" class="btn btn-danger" href="#">Excluir</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Adicionar Mão de Obra -->
+<div class="modal fade" id="addMaodeObraModal" tabindex="-1" role="dialog"
+     aria-labelledby="addMaodeObraModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMaodeObraModalLabel">Adicionar Mão de Obra</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulário para Adicionar Mão de Obra -->
+                <form id="addMaodeObraForm" method="post" action="{% url 'adicionar_maodeobra' %}">
+                    {% csrf_token %}
+                    <!-- Campos do formulário -->
+                    <div class="form-group">
+                        <label for="nome_maodeobra">Nome</label>
+                        <input type="text" class="form-control" id="nome_maodeobra" name="nome_maodeobra"
+                               placeholder="Digite o nome da Mão de Obra">
+                    </div>
+                    <div class="form-group">
+                        <label for="desc_maodeobra">Descrição</label>
+                        <textarea class="form-control" id="desc_maodeobra" name="desc_maodeobra"
+                                  placeholder="Digite a descrição da Mão de Obra"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="custo_maodeobra">Custo</label>
+                        <input type="text" class="form-control" id="custo_maodeobra" name="custo_maodeobra"
+                               placeholder="Digite o custo da Mão de Obra">
+                    </div>
+
+                    <!-- Botão de Submissão -->
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+<script>
+    $('#editMaodeObraModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var idMaodeObra = button.data('id-maodeobra');
+        var nomeMaodeObra = button.data('nome-maodeobra');
+        var descMaodeObra = button.data('desc-maodeobra');
+        var custoMaodeObra = button.data('custo-maodeobra');
+
+        // Preencha os campos do formulário no modal com os dados da Mão de Obra
+        document.getElementById('edit_Id_MaodeObra').value = idMaodeObra;
+        document.getElementById('edit_Nome_MaodeObra').value = nomeMaodeObra;
+        document.getElementById('edit_Desc_MaodeObra').value = descMaodeObra;
+        document.getElementById('edit_Custo_MaodeObra').value = custoMaodeObra;
+    });
+
+    function enviarDadosEdicaoMaodeObra() {
+        var idMaodeObra = document.getElementById('edit_Id_MaodeObra').value;
+        var nomeMaodeObra = document.getElementById('edit_Nome_MaodeObra').value || '';  // Ajuste aqui
+        var descMaodeObra = document.getElementById('edit_Desc_MaodeObra').value || '';  // Ajuste aqui
+        var custoMaodeObra = document.getElementById('edit_Custo_MaodeObra').value || '';  // Ajuste aqui
+
+        var dadosEdicao = {
+            'nomeMaodeObra': nomeMaodeObra,
+            'descMaodeObra': descMaodeObra,
+            'custoMaodeObra': custoMaodeObra
+        };
+
+        console.log('Dados de edição:', dadosEdicao);
+
+        $.ajax({
+            type: 'POST',
+            url: '/editar_maodeobra/' + idMaodeObra + '/',
+            data: dadosEdicao,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            },
+            success: function (response) {
+                console.log('Dados enviados com sucesso para a view de edição:', response);
+                $('#editMaodeObraModal').modal('hide');
+            },
+            error: function (error) {
+                console.error('Erro ao enviar dados para a view de edição:', error);
+                $('#editMaodeObraModal').modal('hide');
+            }
+        });
+    }
+
+
+    function excluirMaodeObra(idMaodeObra) {
+        document.getElementById('linkExclusaoMaodeObra').href = '/excluir_maodeobra/' + idMaodeObra + '/';
+    }
+</script>
+
+</body>
+</html>
+

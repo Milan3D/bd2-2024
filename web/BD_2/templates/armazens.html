@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Armazéns</title>
+    <!-- Include the Bootstrap library -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- Include the navigation bar -->
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Lista de Armazéns</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Morada</th>
+                    <th>Email</th>
+                    <th>Contacto</th>
+                    <th>ID do Funcionário</th>
+                    {% if tem_permissao %}
+                    <th>Ações</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for armazem in armazens %}
+                <tr>
+                    <td>{{ armazem.ID_ARMAZEM }}</td>
+                    <td>{{ armazem.NOME_ARMAZEM }}</td>
+                    <td>{{ armazem.MORADA_ARMAZEM }}</td>
+                    <td>{{ armazem.EMAIL_ARMAZEM }}</td>
+                    <td>{{ armazem.CONTACTO_ARMAZEM }}</td>
+                    <td>{{ armazem.ID_FUNCIONARIO }}</td>
+                    {% if tem_permissao %}
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#deleteArmazemModal"
+                            onclick="excluirArmazem({{ armazem.ID_ARMAZEM }})">Excluir</button>
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                            data-target="#editArmazemModal" data-id-armazem="{{ armazem.ID_ARMAZEM }}"
+                            data-nome-armazem="{{ armazem.NOME_ARMAZEM }}"
+                            data-morada-armazem="{{ armazem.MORADA_ARMAZEM }}"
+                            data-email-armazem="{{ armazem.EMAIL_ARMAZEM }}"
+                            data-contacto-armazem="{{ armazem.CONTACTO_ARMAZEM }}"
+                            data-id-funcionario="{{ armazem.ID_FUNCIONARIO }}">Editar</button>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if tem_permissao %}
+        <!-- Button to Add Armazem -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addArmazemModal">Adicionar Armazém</button>
+        {% endif %}
+    </div>
+
+    <!-- Modal to Edit Armazem -->
+    <div class="modal fade" id="editArmazemModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Fields for editing the Armazem as needed -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Armazém</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form fields for editing Armazem -->
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="edit_Id_Armazem" name="edit_Id_Armazem" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Nome_Armazem">Nome do Armazém</label>
+                        <input type="text" class="form-control" id="edit_Nome_Armazem" name="edit_Nome_Armazem">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Morada_Armazem">Morada do Armazém</label>
+                        <input type="text" class="form-control" id="edit_Morada_Armazem" name="edit_Morada_Armazem">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Email_Armazem">Email do Armazém</label>
+                        <input type="text" class="form-control" id="edit_Email_Armazem" name="edit_Email_Armazem">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Contacto_Armazem">Contacto do Armazém</label>
+                        <input type="text" class="form-control" id="edit_Contacto_Armazem" name="edit_Contacto_Armazem">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_Funcionario">ID do Funcionário</label>
+                        <input type="text" class="form-control" id="edit_ID_Funcionario" name="edit_ID_Funcionario">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoArmazem()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal to Delete Armazem -->
+    <div class="modal fade" id="deleteArmazemModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteArmazemModalLabel">Excluir Armazém</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este armazém?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusaoArmazem" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal to Add Armazem -->
+    <div class="modal fade" id="addArmazemModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addArmazemModalLabel">Adicionar Armazém</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'adicionar_armazem' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="add_Nome_Armazem">Nome do Armazém</label>
+                            <input type="text" class="form-control" id="add_Nome_Armazem" name="add_Nome_Armazem">
+                        </div>
+                        <div class="form-group">
+                            <label for="add_Morada_Armazem">Morada do Armazém</label>
+                            <input type="text" class="form-control" id="add_Morada_Armazem" name="add_Morada_Armazem">
+                        </div>
+                        <div class="form-group">
+                            <label for="add_Email_Armazem">Email do Armazém</label>
+                            <input type="text" class="form-control" id="add_Email_Armazem" name="add_Email_Armazem">
+                        </div>
+                        <div class="form-group">
+                            <label for="add_Contacto_Armazem">Contacto do Armazém</label>
+                            <input type="text" class="form-control" id="add_Contacto_Armazem"
+                                name="add_Contacto_Armazem">
+                        </div>
+                        <div class="form-group">
+                            <label for="add_ID_Funcionario">ID do Funcionário</label>
+                            <input type="text" class="form-control" id="add_ID_Funcionario" name="add_ID_Funcionario">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include jQuery and Bootstrap JS libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <!-- Custom JavaScript for handling modals -->
+    <script>
+        $('#editArmazemModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idArmazem = button.data('id-armazem');
+            var nomeArmazem = button.data('nome-armazem');
+            var moradaArmazem = button.data('morada-armazem');
+            var emailArmazem = button.data('email-armazem');
+            var contactoArmazem = button.data('contacto-armazem');
+            var idFuncionario = button.data('id-funcionario');
+
+            var modal = $(this);
+            modal.find('.modal-body #edit_Id_Armazem').val(idArmazem);
+            modal.find('.modal-body #edit_Nome_Armazem').val(nomeArmazem);
+            modal.find('.modal-body #edit_Morada_Armazem').val(moradaArmazem);
+            modal.find('.modal-body #edit_Email_Armazem').val(emailArmazem);
+            modal.find('.modal-body #edit_Contacto_Armazem').val(contactoArmazem);
+            modal.find('.modal-body #edit_ID_Funcionario').val(idFuncionario);
+        });
+
+        function enviarDadosEdicaoArmazem() {
+            var idArmazem = $('#edit_Id_Armazem').val();
+            var nomeArmazem = $('#edit_Nome_Armazem').val();
+            var moradaArmazem = $('#edit_Morada_Armazem').val();
+            var emailArmazem = $('#edit_Email_Armazem').val();
+            var contactoArmazem = $('#edit_Contacto_Armazem').val();
+            var idFuncionario = $('#edit_ID_Funcionario').val();
+
+            var dadosEdicao = {
+                'nome_armazem': nomeArmazem,
+                'morada_armazem': moradaArmazem,
+                'email_armazem': emailArmazem,
+                'contacto_armazem': contactoArmazem,
+                'id_funcionario': idFuncionario
+            };
+
+            console.log('Enviando dados de edição: ' + JSON.stringify(dadosEdicao));
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_armazem/' + idArmazem + '/',
+                data: JSON.stringify(dadosEdicao),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                },
+                success: function (response) {
+                    console.log('Resposta do servidor: ' + response);
+                    $('#editArmazemModal').modal('hide');
+                },
+                error: function (response) {
+                    console.error('Erro ao editar armazém: ' + response);
+                    $('#editArmazemModal').modal('hide');
+                }
+            });
+
+            // Feche o modal após o envio
+            $('#editArmazemModal').modal('hide');
+        }
+
+        function excluirArmazem(armazemId) {
+            console.log('Excluir armazém com ID ' + armazemId);
+            if (armazemId == null) {
+                console.error('ID do armazém não pode ser nulo');
+                return;
+            }
+
+            var linkExclusao = '/excluir_armazem/' + armazemId + '/';
+            $('#linkExclusaoArmazem').attr('href', linkExclusao);
+        }
+
+        function enviarDadosAdicaoArmazem() {
+            var nomeArmazem = $('#add_Nome_Armazem').val();
+            var moradaArmazem = $('#add_Morada_Armazem').val();
+            var emailArmazem = $('#add_Email_Armazem').val();
+            var contactoArmazem = $('#add_Contacto_Armazem').val();
+            var idFuncionario = $('#add_ID_Funcionario').val();
+
+            var dadosAdicao = {
+                'nome_armazem': nomeArmazem,
+                'morada_armazem': moradaArmazem,
+                'email_armazem': emailArmazem,
+                'contacto_armazem': contactoArmazem,
+                'id_funcionario': idFuncionario
+            };
+            console.log('Enviando dados de adição: ' + JSON.stringify(dadosAdicao));
+
+            // Feche o modal após o envio
+            $('#addArmazemModal').modal('hide');
+        }
+    </script>
+
+</body>
+
+</html>

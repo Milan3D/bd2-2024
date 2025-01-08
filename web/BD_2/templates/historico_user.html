@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Encomendas</title>
+    <!-- Adicione o link para o Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    
+    {% include 'navbar.html' %}
+
+    <div class="container mt-4">
+        <h2>Histórico de Encomendas do Utilizador</h2>
+
+        <!-- Tabela de Histórico de Encomendas -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Data da Encomenda</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Use a loop to dynamically populate rows based on user's order data -->
+                <tr>
+                    <th scope="row">1</th>
+                    <td>2023-01-01</td>
+                    <td>$100.00</td>
+                    <td>Entregue</td>
+                    <td><a href="{% url 'detalhes_encomenda' id=1 %}" class="btn btn-info">Mais Detalhes</a></td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>2023-02-15</td>
+                    <td>$150.50</td>
+                    <td>Em Processamento</td>
+                    <td><a href="{% url 'detalhes_encomenda' id=2 %}" class="btn btn-info">Mais Detalhes</a></td>
+                </tr>
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Adicione o link para o Bootstrap JS e o jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>

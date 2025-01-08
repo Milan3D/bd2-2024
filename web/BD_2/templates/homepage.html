@@ -1,0 +1,177 @@
+<!-- homepage.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <!-- Adicione o link para os estilos do Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Inclua a barra de navegação -->
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <div class="row">
+
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Equipamentos</h5>
+                        <a class="btn btn-primary" href="{% url 'equipamentos' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Componentes</h5>
+                        <a class="btn btn-primary" href="{% url 'componentes' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Encomendas</h5>
+                        <a class="btn btn-primary" href="{% url 'encomendas' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Armazens</h5>
+                        <a class="btn btn-primary" href="{% url 'armazens' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">stock_equipamentos</h5>
+                        <a class="btn btn-primary" href="{% url 'stock_equipamentos' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">stockcomponentes</h5>
+                        <a class="btn btn-primary" href="{% url 'stockcomponentes' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">categorias_componentes</h5>
+                        <a class="btn btn-primary" href="{% url 'categorias_componentes' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">encomendas_componentes</h5>
+                        <a class="btn btn-primary" href="{% url 'encomendas_componentes' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="row">
+
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">fornecedores</h5>
+                        <a class="btn btn-primary" href="{% url 'fornecedores' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">fornecedores_componentes</h5>
+                        <a class="btn btn-primary" href="{% url 'fornecedores_componentes' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">maodeobra</h5>
+                        <a class="btn btn-primary" href="{% url 'maodeobra' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">lotes</h5>
+                        <a class="btn btn-primary" href="{% url 'lotes' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="row">
+
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">funcionarios</h5>
+                        <a class="btn btn-primary" href="{% url 'funcionarios' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">producao_diaria</h5>
+                        <a class="btn btn-primary" href="{% url 'producao_diaria' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">tipoequipamentos</h5>
+                        <a class="btn btn-primary" href="{% url 'tipoequipamentos' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">lotes</h5>
+                        <a class="btn btn-primary" href="{% url 'lotes' %}">Selecionar</a>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <!-- Adicione o link para os scripts do Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</body>
+</html>

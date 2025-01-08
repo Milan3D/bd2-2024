@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Componentes</title>
+    <!-- Adicione este link para incluir a biblioteca Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Lista de Componentes</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Componente</th>
+                    <th>ID Categoria de Componentes</th>
+                    <th>Nome Componente</th>
+                    <th>Descrição Componente</th>
+                    <th>Preço Médio Componente</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for componente in componentes %}
+                <tr>
+                    <td>{{ componente.ID_COMPONENTE }}</td>
+                    <td>{{ componente.ID_CATCOMPONENTES }}</td>
+                    <td>{{ componente.NOME_COMPONENTE }}</td>
+                    <td>{{ componente.DESCRICAO_COMPONENTE }}</td>
+                    <td>{{ componente.PRECOMEDIO_COMPONENTE }}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#deleteComponenteModal"
+                            onclick="excluirComponente({{ componente.ID_COMPONENTE }})">Excluir</button>
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                            data-target="#editComponenteModal" data-id-componente="{{ componente.ID_COMPONENTE }}"
+                            data-id-catcomponente="{{ componente.ID_CATCOMPONENTES }}"
+                            data-nome-componente="{{ componente.NOME_COMPONENTE }}"
+                            data-desc-componente="{{ componente.DESCRICAO_COMPONENTE }}"
+                            data-preco-componente="{{ componente.PRECOMEDIO_COMPONENTE }}">Editar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botão para Adicionar Componente -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addComponenteModal">Adicionar Componente</button>
+    </div>
+
+    <!-- Modal para Editar Componente -->
+    <div class="modal fade" id="editComponenteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">a
+                        <input type="hidden" class="form-control" id="edit_Id_Componente" name="edit_Id_Componente"
+                            readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_CatComponente">ID Categoria de Componentes</label>
+                        <input type="text" class="form-control" id="edit_ID_CatComponente" name="edit_ID_CatComponente">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Nome_Componente">Nome do Componente</label>
+                        <input type="text" class="form-control" id="edit_Nome_Componente" name="edit_Nome_Componente">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Desc_Componente">Descrição do Componente</label>
+                        <input type="text" class="form-control" id="edit_Desc_Componente" name="edit_Desc_Componente">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Preco_Componente">Preço Médio do Componente</label>
+                        <input type="text" class="form-control" id="edit_Preco_Componente" name="edit_Preco_Componente">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoComponente()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Excluir Componente -->
+    <div class="modal fade" id="deleteComponenteModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteComponenteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteComponenteModalLabel">Excluir Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este componente?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusao" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Componente -->
+    <div class="modal fade" id="addComponenteModal" tabindex="-1" role="dialog"
+        aria-labelledby="addComponenteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addComponenteModalLabel">Adicionar Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulário para Adicionar Componente -->
+                    <form id="addComponenteForm" method="post" action="{% url 'adicionar_componente' %}">
+                        {% csrf_token %}
+                        <!-- Campos do formulário -->
+                        <div class="form-group">
+                            <label for="id_catcomponentes">ID Categoria de Componentes</label>
+                            <input type="text" class="form-control" id="id_catcomponentes" name="id_catcomponentes"
+                                placeholder="Digite o ID Categoria de Componentes">
+                        </div>
+                        <div class="form-group">
+                            <label for="nome_componente">Nome do Componente</label>
+                            <input type="text" class="form-control" id="nome_componente" name="nome_componente"
+                                placeholder="Digite o nome do componente">
+                        </div>
+                        <div class="form-group">
+                            <label for="desc_componente">Descrição do Componente</label>
+                            <textarea class="form-control" id="desc_componente" name="desc_componente"
+                                placeholder="Digite a descrição do componente"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="preco_componente">Preço Médio do Componente</label>
+                            <input type="text" class="form-control" id="preco_componente" name="preco_componente"
+                                placeholder="Digite o preço médio do componente">
+                        </div>
+
+                        <!-- Botão de Submissão -->
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+    $('#editComponenteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idComponente = button.data('id-componente');
+            var idCatComponente = button.data('id-catcomponente');
+            var nomeComponente = button.data('nome-componente');
+            var descComponente = button.data('desc-componente');
+            var precoComponente = button.data('preco-componente');
+
+            console.log('Valores antes de enviar AJAX:');
+            console.log('idComponente:', idComponente);
+            console.log('idCatComponente:', idCatComponente);
+            console.log('nomeComponente:', nomeComponente);
+            console.log('descComponente:', descComponente);
+            console.log('precoComponente:', precoComponente);
+
+            // Preencha os campos do formulário no modal com os dados do componente
+            document.getElementById('edit_Id_Componente').value = idComponente;
+            document.getElementById('edit_ID_CatComponente').value = idCatComponente;
+            document.getElementById('edit_Nome_Componente').value = nomeComponente;
+            document.getElementById('edit_Desc_Componente').value = descComponente;
+            document.getElementById('edit_Preco_Componente').value = precoComponente;
+        });
+
+        function enviarDadosEdicaoComponente() {
+            var idComponente = document.getElementById('edit_Id_Componente').value;
+            var idCatComponente = document.getElementById('edit_ID_CatComponente').value;
+            var nomeComponente = document.getElementById('edit_Nome_Componente').value;
+            var descComponente = document.getElementById('edit_Desc_Componente').value;
+            var precoComponente = document.getElementById('edit_Preco_Componente').value;
+
+            console.log('Valoreeeeeeeeeeeeessssssssss:');
+            console.log('idComponente:', idComponente);
+            console.log('idCatComponente:', idCatComponente);
+            console.log('nomeComponente:', nomeComponente);
+            console.log('descComponente:', descComponente);
+            console.log('precoComponente:', precoComponente);
+
+            var dadosEdicao = {
+                idComponente: idComponente,
+                idCatComponente: idCatComponente,
+                nomeComponente: nomeComponente,
+                descComponente: descComponente,
+                precoComponente: precoComponente
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_componente/' + idComponente + '/',
+                data: JSON.stringify(dadosEdicao),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    console.log('Dados enviados com sucesso para a view de edição:', response);
+                    $('#editComponenteModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados para a view de edição:', error);
+                }
+            });
+        }
+
+        function excluirComponente(componenteId) {
+            var linkExclusao = '/eliminar_componente/' + componenteId + '/';
+            document.getElementById('linkExclusao').href = linkExclusao;
+
+            $('#deleteComponenteModal').modal('show');
+        }
+    </script>
+</body>
+
+</html>

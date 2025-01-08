@@ -1,0 +1,14 @@
+CREATE VIEW vista_produtos_enviados_diario AS
+SELECT
+    gv.DATA_GUIAVENDAS AS data_guiasvendas,
+    COUNT(e.ID_EQUIP) AS total_produtos_enviados
+FROM
+    GUIAREMESSAVENDAS gv
+JOIN
+    FATURA f ON gv.ID_GUIAVENDAS = f.ID_GUIAVENDAS
+JOIN
+    EQUIPAMENTOS_FATURA ef ON f.ID_FATURA = ef.ID_FATURA
+JOIN
+    EQUIPAMENTOS e ON ef.ID_EQUIP = e.ID_EQUIP
+GROUP BY
+    gv.DATA_GUIAVENDAS;

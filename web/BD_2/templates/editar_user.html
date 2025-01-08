@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Utilizador</title>
+    <!-- Adicione o link para o Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+<div class="container mt-4">
+
+    <br>
+    <h2 class="mb-4">Editar Utilizador</h2>
+    <br>
+
+    <form method="post">
+        {% csrf_token %}
+        <!-- Adicione campos de formulário para editar os detalhes do utilizador -->
+        <div class="form-group">
+            <label for="nome">Nome:</label>
+            <input type="text" class="form-control" id="nome" name="nome" value="{{ utilizador.nome }}" required>
+        </div>
+        <div class="form-group">
+            <label for="email">E-mail:</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ utilizador.email }}" required>
+        </div>
+        <div class="form-group">
+            <label for="telefone">Telefone:</label>
+            <input type="tel" class="form-control" id="telefone" name="telefone" value="{{ utilizador.telefone }}" required>
+        </div>
+        <div class="form-group">
+            <label for="nif">NIF:</label>
+            <input type="text" class="form-control" id="nif" name="nif" value="{{ utilizador.nif }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+    </form>
+
+</div>
+
+<!-- Adicione o link para o Bootstrap JS e o jQuery -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>

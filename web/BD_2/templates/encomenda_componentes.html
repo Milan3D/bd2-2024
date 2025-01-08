@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encomendas de Componentes</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Lista de Encomendas de Componentes</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Encomenda</th>
+                    <th>ID Componente</th>
+                    <th>Quantidade</th>
+                    <th>Preço por Unidade</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for encomenda_componente in encomendas_componentes %}
+                <tr>
+                    <td>{{ encomenda_componente.ID_ENCOMENDA }}</td>
+                    <td>{{ encomenda_componente.ID_COMPONENTE }}</td>
+                    <td>{{ encomenda_componente.QUANTIDADE_EC }}</td>
+                    <td>{{ encomenda_componente.PRECOUNIDADE_EC }}</td>
+                    <td>
+                        <button type="button" class="btn btn-danger btn-sm"
+                            data-toggle="modal"
+                            data-target="#deleteEncomendaComponenteModal"
+                            onclick="excluirEncomendaComponente({{ encomenda_componente.ID_ENCOMENDA }},
+                            {{ encomenda_componente.ID_COMPONENTE }})">Excluir</button>
+                        <button type="button" class="btn btn-warning btn-sm"
+                            data-toggle="modal"
+                            data-target="#editEncomendaComponenteModal"
+                            data-id-encomenda="{{ encomenda_componente.ID_ENCOMENDA }}"
+                            data-id-componente="{{ encomenda_componente.ID_COMPONENTE }}"
+                            data-quantidade-ec="{{ encomenda_componente.QUANTIDADE_EC }}"
+                            data-precounidade-ec="{{ encomenda_componente.PRECOUNIDADE_EC }}">Editar</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button class="btn btn-success" data-toggle="modal" data-target="#addEncomendaComponenteModal">Adicionar
+            Encomenda de Componente</button>
+    </div>
+
+    <div class="modal fade" id="editEncomendaComponenteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Encomenda de Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="edit_Id_Encomenda" name="edit_Id_Encomenda" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Id_Componente">ID Componente</label>
+                        <input type="text" class="form-control" id="edit_Id_Componente" name="edit_Id_Componente">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Quantidade_EC">Quantidade</label>
+                        <input type="text" class="form-control" id="edit_Quantidade_EC" name="edit_Quantidade_EC">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_PrecoUnidade_EC">Preço por Unidade</label>
+                        <input type="text" class="form-control" id="edit_PrecoUnidade_EC" name="edit_PrecoUnidade_EC">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary"
+                        onclick="enviarDadosEdicaoEncomendaComponente()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteEncomendaComponenteModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteEncomendaComponenteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteEncomendaComponenteModalLabel">Excluir Encomenda de Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir esta encomenda de componente?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusao" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addEncomendaComponenteModal" tabindex="-1" role="dialog"
+        aria-labelledby="addEncomendaComponenteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEncomendaComponenteModalLabel">Adicionar Encomenda de Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addEncomendaComponenteForm" method="post" action="{% url 'adicionar_encomenda_componente' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="id_encomenda">ID Encomenda</label>
+                            <input type="text" class="form-control" id="id_encomenda" name="id_encomenda"
+                                placeholder="Digite o ID da Encomenda">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_componente">ID Componente</label>
+                            <input type="text" class="form-control" id="id_componente" name="id_componente"
+                                placeholder="Digite o ID do Componente">
+                        </div>
+                        <div class="form-group">
+                            <label for="quantidade_ec">Quantidade</label>
+                            <input type="text" class="form-control" id="quantidade_ec" name="quantidade_ec"
+                                placeholder="Digite a quantidade">
+                        </div>
+                        <div class="form-group">
+                            <label for="precounidade_ec">Preço por Unidade</label>
+                            <input type="text" class="form-control" id="precounidade_ec" name="precounidade_ec"
+                                placeholder="Digite o preço por unidade">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+        $('#editEncomendaComponenteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idEncomenda = button.data('id-encomenda');
+            var idComponente = button.data('id-componente');
+            var quantidadeEc = button.data('quantidade-ec');
+            var precoUnidadeEc = button.data('precounidade-ec');
+
+            document.getElementById('edit_Id_Encomenda').value = idEncomenda;
+            document.getElementById('edit_Id_Componente').value = idComponente;
+            document.getElementById('edit_Quantidade_EC').value = quantidadeEc;
+            document.getElementById('edit_PrecoUnidade_EC').value = precoUnidadeEc;
+        });
+
+        function enviarDadosEdicaoEncomendaComponente() {
+            var idEncomenda = document.getElementById('edit_Id_Encomenda').value;
+            var idComponente = document.getElementById('edit_Id_Componente').value;
+            var quantidadeEc = document.getElementById('edit_Quantidade_EC').value;
+            var precoUnidadeEc = document.getElementById('edit_PrecoUnidade_EC').value;
+
+            var dadosEdicao = {
+                idEncomenda: idEncomenda,
+                idComponente: idComponente,
+                quantidadeEc: quantidadeEc,
+                precoUnidadeEc: precoUnidadeEc
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_encomenda_componente/' + idEncomenda + '/' + idComponente + '/',
+                data: JSON.stringify(dadosEdicao),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    console.log('Dados enviados com sucesso para a view de edição:', response);
+                    $('#editEncomendaComponenteModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados para a view de edição:', error);
+                }
+            });
+        }
+
+        function excluirEncomendaComponente(idEncomenda, idComponente) {
+            var linkExclusao = '/eliminar_encomenda_componente/' + idEncomenda + '/' + idComponente + '/';
+            document.getElementById('linkExclusao').href = linkExclusao;
+
+            $('#deleteEncomendaComponenteModal').modal('show');
+        }
+    </script>
+</body>
+
+</html>

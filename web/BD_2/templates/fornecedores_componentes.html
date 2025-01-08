@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fornecedores Componentes</title>
+    <!-- Adicione o link para incluir a biblioteca Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Lista de Fornecedores Componentes</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Componente</th>
+                    <th>ID Fornecedor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fornecedor_componente in fornecedores_componentes %}
+                <tr>
+                    <td>{{ fornecedor_componente.ID_COMPONENTE }}</td>
+                    <td>{{ fornecedor_componente.ID_FORNECEDOR }}</td>
+                    <td>
+                        {% if tem_permissao %}
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#deleteFornecedorComponenteModal" onclick="excluirFornecedorComponente({{ fornecedor_componente.ID_COMPONENTE }},
+                            {{ fornecedor_componente.ID_FORNECEDOR }})">Excluir</button>
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                            data-target="#editFornecedorComponenteModal"
+                            data-id-componente="{{ fornecedor_componente.ID_COMPONENTE }}"
+                            data-id-fornecedor="{{ fornecedor_componente.ID_FORNECEDOR }}">Editar</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if tem_permissao %}
+        <!-- Botão para Adicionar Fornecedor Componente -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addFornecedorComponenteModal">Adicionar
+            Fornecedor Componente</button>
+        {% endif %}
+    </div>
+
+    <!-- Modal para Editar Fornecedor Componente -->
+    <div class="modal fade" id="editFornecedorComponenteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Adicione campos do formulário para editar o fornecedor componente conforme necessário -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Fornecedor Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_Id_Componente">ID do Componente</label>
+                        <input type="hidden" id="old_Id_Componente" name="old_Id_Componente">
+                        <input type="text" class="form-control" id="edit_Id_Componente" name="edit_Id_Componente">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Id_Fornecedor">ID do Fornecedor</label>
+                        <input type="hidden" id="old_Id_Fornecedor" name="old_Id_Fornecedor">
+                        <input type="text" class="form-control" id="edit_Id_Fornecedor" name="edit_Id_Fornecedor">
+                    </div>
+                    <!-- Adicione outros campos do formulário conforme necessário -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary"
+                        onclick="enviarDadosEdicaoFornecedorComponente()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal para Excluir Fornecedor Componente -->
+    <div class="modal fade" id="deleteFornecedorComponenteModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteFornecedorComponenteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteFornecedorComponenteModalLabel">Excluir Fornecedor Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este fornecedor componente?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusaoFornecedorComponente" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Fornecedor Componente -->
+    <div class="modal fade" id="addFornecedorComponenteModal" tabindex="-1" role="dialog"
+        aria-labelledby="addFornecedorComponenteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addFornecedorComponenteModalLabel">Adicionar Fornecedor Componente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulário para Adicionar Fornecedor Componente -->
+                    <form id="addFornecedorComponenteForm" method="post"
+                        action="{% url 'adicionar_fornecedor_componente' %}">
+                        {% csrf_token %}
+                        <!-- Campos do formulário -->
+                        <div class="form-group">
+                            <label for="id_componente">ID do Componente</label>
+                            <input type="text" class="form-control" id="id_componente" name="id_componente"
+                                placeholder="Digite o ID do Componente">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_fornecedor">ID do Fornecedor</label>
+                            <input type="text" class="form-control" id="id_fornecedor" name="id_fornecedor"
+                                placeholder="Digite o ID do Fornecedor">
+                        </div>
+
+                        <!-- Botão de Submissão -->
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+        $('#editFornecedorComponenteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idComponente = button.data('id-componente');
+            var idFornecedor = button.data('id-fornecedor');
+
+            // Preencha os campos do formulário no modal com os dados do fornecedor componente
+            document.getElementById('old_Id_Componente').value = idComponente;
+            document.getElementById('edit_Id_Componente').value = idComponente;
+            document.getElementById('old_Id_Fornecedor').value = idFornecedor;
+            document.getElementById('edit_Id_Fornecedor').value = idFornecedor;
+        });
+
+        function enviarDadosEdicaoFornecedorComponente() {
+            var idComponente = document.getElementById('old_Id_Componente').value;
+            var idFornecedor = document.getElementById('old_Id_Fornecedor').value;
+            var idComponenteNovo = document.getElementById('edit_Id_Componente').value;
+            var idFornecedorNovo = document.getElementById('edit_Id_Fornecedor').value;
+
+            console.log('Dados de edição do fornecedor componente:', idComponente, idFornecedor, idComponenteNovo, idFornecedorNovo);
+
+            // Corrigindo a forma como os dados são passados
+            var dadosEdicao = {
+                id_componente: idComponente,
+                id_fornecedor: idFornecedor,
+                id_componente_novo: idComponenteNovo,
+                id_fornecedor_novo: idFornecedorNovo
+            };
+
+            console.log('Dados de edição do fornecedor componente:', dadosEdicao);
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_fornecedor_componente/' + idComponente + '/' + idFornecedor + '/',
+                data: JSON.stringify(dadosEdicao),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    $('#editFornecedorComponenteModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados de edição para a visualização:', error);
+                }
+            });
+        }
+
+        function excluirFornecedorComponente(idComponente, idFornecedor) {
+            var linkExclusao = '/excluir_fornecedor_componente/' + idComponente + '/' + idFornecedor + '/';
+            document.getElementById('linkExclusaoFornecedorComponente').href = linkExclusao;
+
+            $('#deleteFornecedorComponenteModal').modal('show');
+        }
+    </script>
+
+</body>
+
+</html>

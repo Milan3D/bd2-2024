@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {%include 'navbar.html'%}
+
+    <div class="container mt-5">
+        <h2>Lista de Clientes</h2>
+        <!-- Tabela de Clientes -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Data de Nascimento</th>
+                    <th>Morada</th>
+                    <th>NIF</th>
+                    <th>Email</th>
+                    <th>Contacto</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Loop para listar os clientes -->
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.id }}</td>
+                    <td>{{ cliente.nome }}</td>
+                    <td>{{ cliente.datanasc }}</td>
+                    <td>{{ cliente.morada }}</td>
+                    <td>{{ cliente.nif }}</td>
+                    <td>{{ cliente.email }}</td>
+                    <td>{{ cliente.contacto }}</td>
+                    <td>
+                        <!-- Botões de editar e excluir -->
+                        <a href="#" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editClienteModal"
+                            data-id-cliente="{{ cliente.id }}" data-nome="{{ cliente.nome }}"
+                            data-datanasc="{{ cliente.datanasc }}" data-morada="{{ cliente.morada }}"
+                            data-nif="{{ cliente.nif }}" data-email="{{ cliente.email }}"
+                            data-contacto="{{ cliente.contacto }}">Editar</a>
+                        <button class="btn btn-danger btn-sm"
+                            onclick="excluirCliente({{ cliente.id }})">Excluir</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botão para Adicionar Cliente -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addClienteModal">Adicionar Cliente</button>
+    </div>
+
+    <!-- Modal para Adicionar Cliente -->
+    <div class="modal fade" id="addClienteModal" tabindex="-1" role="dialog" aria-labelledby="addClienteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addClienteModalLabel">Adicionar Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="post" action="{% url 'adicionar_cliente' %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="nome">Nome</label>
+                            <input type="text" class="form-control" id="nome" name="nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="datanasc">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="datanasc" name="datanasc" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="morada">Morada</label>
+                            <input type="text" class="form-control" id="morada" name="morada" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nif">NIF</label>
+                            <input type="text" class="form-control" id="nif" name="nif" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contacto">Contacto</label>
+                            <input type="text" class="form-control" id="contacto" name="contacto" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Cliente -->
+    <div class="modal fade" id="editClienteModal" tabindex="-1" role="dialog" aria-labelledby="editClienteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editClienteModalLabel">Editar Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="editClienteForm" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="edit_nome">Nome</label>
+                            <input type="text" class="form-control" id="edit_nome" name="nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_datanasc">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="edit_datanasc" name="datanasc" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_morada">Morada</label>
+                            <input type="text" class="form-control" id="edit_morada" name="morada" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_nif">NIF</label>
+                            <input type="text" class="form-control" id="edit_nif" name="nif" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_email">Email</label>
+                            <input type="email" class="form-control" id="edit_email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_contacto">Contacto</label>
+                            <input type="text" class="form-control" id="edit_contacto" name="contacto" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal para Excluir Cliente -->
+    <div class="modal fade" id="deleteClienteModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteClienteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteClienteModalLabel">Excluir Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir este cliente?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="confirmDeleteBtn" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+        // Função para confirmar e realizar a exclusão
+        function excluirCliente(id) {
+            var linkExclusao = '/excluir_cliente/' + id + '/';
+            document.getElementById('confirmDeleteBtn').href = linkExclusao;
+            $('#deleteClienteModal').modal('show');
+        }
+    </script>
+
+    <script>
+        $('#editClienteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var idCliente = button.data('id-cliente');
+            var nome = button.data('nome');
+            var datanasc = button.data('datanasc');
+            var morada = button.data('morada');
+            var nif = button.data('nif');
+            var email = button.data('email');
+            var contacto = button.data('contacto');
+            var modal = $(this);
+            modal.find('.modal-content').html(`
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editClienteModalLabel">Editar Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="post" action="/editar_cliente/${idCliente}/">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="edit_nome">Nome</label>
+                            <input type="text" class="form-control" id="edit_nome" name="nome" value="${nome}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_datanasc">Data de Nascimento</label>
+                            <input type="date" class="form-control" id="edit_datanasc" name="datanasc" value="${datanasc}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_morada">Morada</label>
+                            <input type="text" class="form-control" id="edit_morada" name="morada" value="${morada}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_nif">NIF</label>
+                            <input type="text" class="form-control" id="edit_nif" name="nif" value="${nif}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_email">Email</label>
+                            <input type="email" class="form-control" id="edit_email" name="email" value="${email}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_contacto">Contacto</label>
+                            <input type="text" class="form-control" id="edit_contacto" name="contacto" value="${contacto}" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Alterações</button>
+                    </div>
+                </form>
+            `);
+        });
+    </script>
+
+</body>
+
+</html>

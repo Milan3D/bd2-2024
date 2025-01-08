@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listagem de Utilizadores</title>
+    <!-- Adicione o link para o Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+<div class="container mt-4">
+    <br><br>
+    <h2>Listagem de Utilizadores</h2>
+    <br>
+
+    <!-- Barra de Pesquisa por Telefone -->
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Pesquisar por Telefone" id="phoneSearchInput">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" onclick="searchByPhone()">Pesquisar</button>
+        </div>
+    </div>
+
+    <!-- Tabela de Utilizadores -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">NIF</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for utilizador in utilizadores %}
+                <tr>
+                    <th scope="row">{{ utilizador.id }}</th>
+                    <td>{{ utilizador.nome }}</td>
+                    <td>{{ utilizador.email }}</td>
+                    <td>{{ utilizador.telefone }}</td>
+                    <td>{{ utilizador.nif }}</td>
+                    <td>
+                        <!-- Botões de Ação -->
+                        <a href="{% url 'editar_user' id=1 %}" class="btn btn-warning">Editar</a>
+                        <a href="{% url 'historico_user' id=1 %}" class="btn btn-warning">Historico</a>
+                        <button type="button" class="btn btn-danger">Excluir</button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Adicione o link para o Bootstrap JS e o jQuery -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    // Função para pesquisar por telefone
+    function searchByPhone() {
+        // Obter o valor inserido no campo de pesquisa
+        var phoneSearchValue = document.getElementById('phoneSearchInput').value;
+
+        // Lógica de pesquisa (substitua com sua própria lógica)
+        // Aqui você pode filtrar a tabela com base no número de telefone
+        alert('Pesquisar por telefone: ' + phoneSearchValue);
+    }
+</script>
+
+</body>
+</html>

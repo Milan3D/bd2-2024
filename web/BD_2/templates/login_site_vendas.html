@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- Navbar 
+    {% include 'navbar.html' %}
+-->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h2 class="text-center text-dark mt-5">Login</h2>
+                <div class="card my-5">
+    
+                    <form method="POST" class="card-body cardbody-color p-lg-5">
+                        {% csrf_token %}
+                        <div class="text-center">
+                            <img src="https://i.imgur.com/JkUK7KI.png" class="img-fluid profile-image-pic my-3"
+                                width="200px" alt="profile">
+                        </div>
+    
+                        <div class="mb-3">
+                            <label for="Username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="text-center"><button type="submit" class="btn btn-primary px-5 mb-5 w-100">Login</button>
+                        </div>
+                        <div id="emailHelp" class="form-text text-center mb-5 text-dark">Sem conta? <a href="{% url 'criar_conta' %}" class="text-dark fw-bold"><b> Criar conta</b></a>
+                        </div>
+                    </form>
+                </div>
+    
+            </div>
+        </div>
+    </div>
+    
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-u83SgbVbo5Gzy0tczQoW5IYr7/j7Q2+Lkb1S/Ygwo2VrH6QkhDaRqG61tmnOHLq"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

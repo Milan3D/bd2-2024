@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produção Diária</title>
+    <!-- Adicione este link para incluir a biblioteca Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Lista de Produção Diária</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Produção</th>
+                    <th>Data Produção</th>
+                    <th>ID Armazém</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producao in producoes_diarias %}
+                <tr>
+                    <td>{{ producao.ID_PRODUCAO }}</td>
+                    <td>{{ producao.DATA_PRODUCAO }}</td>
+                    <td>{{ producao.ID_ARMAZEM }}</td>
+                    <td>
+                        {% if tem_permissao %}
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#deleteProducaoModal"
+                            onclick="excluirProducao({{ producao.ID_PRODUCAO }})">Excluir</button>
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                            data-target="#editProducaoModal" data-id-producao="{{ producao.ID_PRODUCAO }}"
+                            data-data-producao="{{ producao.DATA_PRODUCAO }}"
+                            data-id-armazem="{{ producao.ID_ARMAZEM }}">Editar</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if tem_permissao %}
+        <!-- Botão para Adicionar Produção Diária -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addProducaoModal">Adicionar Produção
+            Diária</button>
+        {% endif %}
+    </div>
+
+    <!-- Modal para Editar Produção Diária -->
+    <div class="modal fade" id="editProducaoModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Adicione campos do formulário para editar a produção diária conforme necessário -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Produção Diária</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="hidden" class="form-control" id="edit_Id_Producao" name="edit_Id_Producao"
+                            readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Data_Producao">Data de Produção</label>
+                        <input type="text" class="form-control" id="edit_Data_Producao" name="edit_Data_Producao">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_Armazem">ID do Armazém</label>
+                        <input type="text" class="form-control" id="edit_ID_Armazem" name="edit_ID_Armazem">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoProducao()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Excluir Produção Diária -->
+    <div class="modal fade" id="deleteProducaoModal" tabindex="-1" role="dialog"
+        aria-labelledby="deleteProducaoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteProducaoModalLabel">Excluir Produção Diária</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza de que deseja excluir esta produção diária?</p>
+                </div>
+                <div class="modal-footer">
+                    <a id="linkExclusaoProducao" class="btn btn-danger" href="#">Excluir</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionar Produção Diária -->
+    <div class="modal fade" id="addProducaoModal" tabindex="-1" role="dialog" aria-labelledby="addProducaoModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProducaoModalLabel">Adicionar Produção Diária</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulário para Adicionar Produção Diária -->
+                    <form id="addProducaoForm" method="post" action="{% url 'adicionar_producao_diaria' %}">
+                        {% csrf_token %}
+                        <!-- Campos do formulário -->
+                        <div class="form-group">
+                            <label for="data_producao">Data de Produção</label>
+                            <input type="date" class="form-control" id="data_producao" name="data_producao">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_armazem">ID do Armazém</label>
+                            <input type="text" class="form-control" id="id_armazem" name="id_armazem"
+                                placeholder="Digite o ID do Armazém">
+                        </div>
+
+                        <!-- Botão de Submissão -->
+                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-0V+QQD6SDUoWhnQ+2d5vbXeXFn5YwwPnKEoj0TlA9TV6M2aM3QCpIjPDuS+P+t8M"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+        $('#editProducaoModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var idProducao = button.data('id-producao');
+            var dataProducao = button.data('data-producao');
+            var idArmazem = button.data('id-armazem');
+
+            // Preencha os campos do formulário no modal com os dados da produção diária
+            document.getElementById('edit_Id_Producao').value = idProducao;
+            document.getElementById('edit_Data_Producao').value = dataProducao;
+            document.getElementById('edit_ID_Armazem').value = idArmazem;
+        });
+
+        function enviarDadosEdicaoProducao() {
+            var idProducao = document.getElementById('edit_Id_Producao').value;
+            var dataProducao = document.getElementById('edit_Data_Producao').value;
+            var idArmazem = document.getElementById('edit_ID_Armazem').value;
+
+            // Formatar a data para o formato esperado YYYY-MM-DD
+            var dataFormatada = new Date(dataProducao).toISOString().split('T')[0];
+
+            var dadosEdicao = {
+                idProducao: idProducao,
+                dataProducao: dataFormatada, // Usar a data formatada
+                idArmazem: idArmazem
+            };
+
+            console.log('Dados de edição:', dadosEdicao);
+
+            $.ajax({
+                type: 'POST',
+                url: '/editar_producao_diaria/' + idProducao + '/',
+                data: JSON.stringify(dadosEdicao),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (response) {
+                    console.log('Dados enviados com sucesso para a view de edição:', response);
+                    $('#editProducaoModal').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro ao enviar dados para a view de edição:', error);
+                }
+            });
+        }
+
+        function excluirProducao(producaoId) {
+            var linkExclusao = '/excluir_producao_diaria/' + producaoId + '/';
+            document.getElementById('linkExclusaoProducao').href = linkExclusao;
+
+            $('#deleteProducaoModal').modal('show');
+        }
+    </script>
+
+</body>
+
+</html>

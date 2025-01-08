@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock de Componentes</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container mt-5">
+        <h2>Lista de Stock de Componentes</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID Armazém</th>
+                    <th>ID Componente</th>
+                    <th>Quantidade</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stockcomponente in stockcomponentes %}
+                <tr>
+                    <td>{{ stockcomponente.ID_ARMAZEM }}</td>
+                    <td>{{ stockcomponente.ID_COMPONENTE }}</td>
+                    <td>{{ stockcomponente.QUANTIDADE_STOCKCOMP }}</td>
+                    <td>
+                        {% if tem_permissao %}
+                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
+                                data-target="#editStockComponenteModal"
+                                data-id-armazem="{{ stockcomponente.ID_ARMAZEM }}"
+                                data-id-componente="{{ stockcomponente.ID_COMPONENTE }}"
+                                data-quantidade="{{ stockcomponente.QUANTIDADE_STOCKCOMP }}">Editar</button>
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                                data-target="#deleteStockComponenteModal"
+                                data-id-armazem="{{ stockcomponente.ID_ARMAZEM }}"
+                                data-id-componente="{{ stockcomponente.ID_COMPONENTE }}"
+                                onclick="excluirStockComponente('{{ stockcomponente.ID_ARMAZEM }}', '{{ stockcomponente.ID_COMPONENTE }}')">
+                                Excluir</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if tem_permissao %}
+        <!-- Botão para Adicionar Stock de Componente -->
+        <button class="btn btn-success" data-toggle="modal" data-target="#addStockComponenteModal">Adicionar Stock de
+            Componente</button>
+        {% endif %}
+    </div>
+
+<!-- Modal para Editar Stock Componente -->
+<div class="modal fade" id="editStockComponenteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <!-- Adicione campos do formulário para editar o stock componente conforme necessário -->
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Stock Componente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" class="form-control" id="edit_id_armazem" name="edit_id_armazem" readonly>
+                    <input type="hidden" class="form-control" id="edit_id_componente" name="edit_id_componente" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="edit_quantidade_stockcomp">Quantidade</label>
+                    <input type="number" class="form-control" id="edit_quantidade_stockcomp" name="edit_quantidade_stockcomp" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoStockComponente()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Excluir Stock Componente -->
+<div class="modal fade" id="deleteStockComponenteModal" tabindex="-1" role="dialog"
+    aria-labelledby="deleteStockComponenteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteStockComponenteModalLabel">Excluir Stock Componente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza de que deseja excluir este stock componente?</p>
+            </div>
+            <div class="modal-footer">
+                <a id="linkExclusao" class="btn btn-danger" href="#">Excluir</a>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Adicionar Stock Componente -->
+<div class="modal fade" id="addStockComponenteModal" tabindex="-1" role="dialog"
+    aria-labelledby="addStockComponenteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStockComponenteModalLabel">Adicionar Stock Componente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulário para Adicionar Stock Componente -->
+                <form id="addStockComponenteForm" method="post" action="{% url 'adicionar_stockcomponente' %}">
+                    {% csrf_token %}
+                    <!-- Campos do formulário -->
+                    <div class="form-group">
+                        <label for="id_armazem">ID do Armazém</label>
+                        <input type="text" class="form-control" id="id_armazem" name="id_armazem" placeholder="Digite o ID do Armazém" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_componente">ID do Componente</label>
+                        <input type="text" class="form-control" id="id_componente" name="id_componente" placeholder="Digite o ID do Componente" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantidade_stockcomp">Quantidade</label>
+                        <input type="number" class="form-control" id="quantidade_stockcomp" name="quantidade_stockcomp" placeholder="Digite a Quantidade" required>
+                    </div>
+                    <!-- Botão de Submissão -->
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-vpUStz73bI3PrGmBh6D6pi1URvNUqD/AzP91wZzBnIegD5D5C2bOyD2Pbq5WKcp"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+        <script>
+            $('#editStockComponenteModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var idArmazem = button.data('id-armazem');
+                var idComponente = button.data('id-componente');
+                var quantidade = button.data('quantidade');
+        
+                // Atualizar os inputs do modal de edição
+                var modal = $(this);
+                modal.find('#edit_id_armazem').val(idArmazem);
+                modal.find('#edit_id_componente').val(idComponente);
+                modal.find('#edit_quantidade_stockcomp').val(quantidade);
+            });
+            
+
+            $(document).ready(function () {
+        // Quando o botão "Adicionar Stock Componente" for clicado, exibir o modal de adicionar
+        $('#addStockComponenteButton').on('click', function () {
+            $('#addStockComponenteModal').modal('show');
+        });
+
+        // Ao fechar o modal de adicionar, redefinir o formulário
+        $('#addStockComponenteModal').on('hidden.bs.modal', function () {
+            $('#addStockComponenteForm')[0].reset();
+        });
+    });
+
+
+            function enviarDadosEdicaoStockComponente() {
+                var idArmazem = $('#edit_id_armazem').val();
+                var idComponente = $('#edit_id_componente').val();
+                var quantidade = $('#edit_quantidade_stockcomp').val();
+        
+                var dadosEdicao = {
+                    id_armazem: idArmazem,
+                    id_componente: idComponente,
+                    quantidade_stockcomp: quantidade,
+                };
+
+                console.log(dadosEdicao);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/editar_stockcomponente/' + idArmazem + '/' + idComponente + '/',
+                    data: JSON.stringify(dadosEdicao),
+                    contentType: 'application/json',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function() {
+                        // Ação após sucesso
+                        $('#editStockComponenteModal').modal('hide');
+                        window.location.reload(); // Atualiza a página após edição
+                    },
+                    error: function() {
+                        // Ação em caso de erro
+                        alert('Erro ao editar stock componente.');
+                    }
+                });
+            }
+        
+            function excluirStockComponente(ID_ARMAZEM, ID_COMPONENTE) {
+                var linkExclusao = '/eliminar_stockcomponente/' + ID_ARMAZEM + '/' + ID_COMPONENTE + '/';
+                document.getElementById('linkExclusao').href = linkExclusao;
+        
+                $('#deleteStockComponenteModal').modal('show');
+            }
+        </script>
+</body>
+
+</html>

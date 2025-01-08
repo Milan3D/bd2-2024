@@ -1,0 +1,54 @@
+-- Create
+CREATE OR REPLACE PROCEDURE sp_Nivelacesso_pgestao_create(p_NOME_NIVEL TEXT, p_DESC_NIVEL TEXT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO NIVELACESSO_PGESTAO(NOME_NIVEL, DESC_NIVEL)
+    VALUES (p_NOME_NIVEL, p_DESC_NIVEL);
+    RAISE NOTICE 'Nível de acesso à plataforma de gestão criado';
+END;
+$$;
+
+-- Read
+CREATE OR REPLACE PROCEDURE sp_Nivelacesso_pgestao_read(p_ID_NIVEL INT4)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT NOME_NIVEL, DESC_NIVEL
+    FROM NIVELACESSO_PGESTAO
+    WHERE ID_NIVEL = p_ID_NIVEL;
+END;
+$$;
+
+-- Update
+CREATE OR REPLACE PROCEDURE sp_Nivelacesso_pgestao_update(p_ID_NIVEL INT4, p_NOME_NIVEL TEXT, p_DESC_NIVEL TEXT)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE NIVELACESSO_PGESTAO
+    SET NOME_NIVEL = p_NOME_NIVEL, DESC_NIVEL = p_DESC_NIVEL
+    WHERE ID_NIVEL = p_ID_NIVEL;
+    RAISE NOTICE 'Nível de acesso à plataforma de gestão atualizado';
+END;
+$$;
+
+-- Delete
+CREATE OR REPLACE PROCEDURE sp_Nivelacesso_pgestao_delete(p_ID_NIVEL INT4)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM NIVELACESSO_PGESTAO
+    WHERE ID_NIVEL = p_ID_NIVEL;
+    RAISE NOTICE 'Nível de acesso à plataforma de gestão eliminado';
+END;
+$$;
+
+-- List
+CREATE OR REPLACE PROCEDURE sp_Nivelacesso_pgestao_list()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT NOME_NIVEL, DESC_NIVEL
+    FROM NIVELACESSO_PGESTAO;
+END;
+$$;
