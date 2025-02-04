@@ -14,7 +14,7 @@ urlpatterns = [
 
     path('equipamentos/', view=views.equipamentos, name='equipamentos'),
     path('adicionar_equipamento/', view=views.adicionar_equipamento, name='adicionar_equipamento'),
-    path('eliminar_equipamento/<int:id>/', view=views.eliminar_equipamento, name='eliminar_equipamento'),
+    path('eliminar_equipamento/<int:id>/', views.excluir_equipamento, name='eliminar_equipamento'),
     path('editar_equipamento/<int:id>/', view=views.editar_equipamento, name='editar_equipamento'),
     path('equipamento/<int:id>/', view=views.equipamento, name='equipamento'),
 
@@ -110,4 +110,7 @@ urlpatterns = [
 
 
     path('homepage_utilizador/', view=views.homepage_utilizador, name='homepage_utilizador'),
+
+    path('excluir_equipamento/<int:id>/', views.excluir_equipamento, name='excluir_equipamento'),
+
 ]

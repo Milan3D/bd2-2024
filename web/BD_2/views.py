@@ -72,33 +72,27 @@ def equipamentos(request):
     
     with connection.cursor() as cursor:
         try:
-            # Get equipment list
-            print("Fetching equipment list...")
-            cursor.execute('SELECT * FROM public.fn_equipamentos_list()')
+            # Get equipment list with joined data
+            print("Fetching equipment list with joined data...")
+            cursor.execute('''
+                SELECT e.*, t.nome_tipoequip, m.nome_mo 
+                FROM public.fn_equipamentos_list() e
+                LEFT JOIN public.fn_tipoequipamentos_list() t ON e.id_tipoequip = t.id_tipoequip
+                LEFT JOIN public.fn_maodeobra_list() m ON e.id_mo = m.id_mo
+            ''')
             resultados = cursor.fetchall()
-            print(f"Equipment results: {resultados}")
+            print(f"Equipment results with joined data: {resultados}")
+            
+            # Get all tipo_equipamento options for dropdowns
+            cursor.execute('SELECT * FROM public.fn_tipoequipamentos_list()')
+            tipos_equipamento = cursor.fetchall()
+            
+            # Get all mao_obra options for dropdowns
+            cursor.execute('SELECT * FROM public.fn_maodeobra_list()')
+            maos_obra = cursor.fetchall()
             
             equipamentos = []
             for resultado in resultados:
-                print(f"Processing equipment: {resultado}")
-                try:
-                    # Get tipo_equipamento name
-                    cursor.execute('SELECT * FROM public.fn_tipoequipamentos_list() WHERE id_tipoequip = %s', [resultado[1]])
-                    tipo_nome = cursor.fetchone()
-                    print(f"Tipo equipment result: {tipo_nome}")
-                except Exception as e:
-                    print(f"Error fetching tipo_equipamento: {str(e)}")
-                    tipo_nome = None
-                
-                try:
-                    # Get mao_obra name
-                    cursor.execute('SELECT * FROM public.fn_mo_list() WHERE id_mo = %s', [resultado[2]])
-                    mo_nome = cursor.fetchone()
-                    print(f"Mao obra result: {mo_nome}")
-                except Exception as e:
-                    print(f"Error fetching mao_obra: {str(e)}")
-                    mo_nome = None
-                
                 equipamento = {
                     'ID_EQUIP': resultado[0],
                     'ID_TIPOEQUIP': resultado[1],
@@ -106,109 +100,117 @@ def equipamentos(request):
                     'NOME_EQUIP': resultado[3],
                     'DESC_EQUIP': resultado[4],
                     'CUSTO_EQUIP': resultado[5],
-                    'tipo_equipamento': {
-                        'NOME_TIPOEQUIP': tipo_nome[1] if tipo_nome else 'N/A'  # Assuming name is second column
-                    },
-                    'mao_obra': {
-                        'NOME_MO': mo_nome[1] if mo_nome else 'N/A'  # Assuming name is second column
-                    }
+                    'TIPO_EQUIPAMENTO_NOME': resultado[6] if len(resultado) > 6 else 'N/A',
+                    'MAO_OBRA_NOME': resultado[7] if len(resultado) > 7 else 'N/A'
                 }
                 equipamentos.append(equipamento)
-                print(f"Added equipment to list: {equipamento}")
 
         except Exception as e:
-            print(f"Main exception type: {type(e)}")
-            print(f"Main exception message: {str(e)}")
-            print(f"Main exception details:", e)
+            print(f"Error: {str(e)}")
+            print(f"Traceback: {traceback.format_exc()}")
             equipamentos = []
+            tipos_equipamento = []
+            maos_obra = []
 
     context = {
         'equipamentos': equipamentos,
         'tem_permissao': tem_permissao,
+        'tipos_equipamento': tipos_equipamento,
+        'maos_obra': maos_obra,
     }
-    print(f"Final context: {context}")
     return render(request, 'equipamentos.html', context)
 
-
-
-
+@csrf_exempt  # Only if you're having CSRF issues
 def adicionar_equipamento(request):
     if request.method == 'POST':
-        id_tipoequip = int(request.POST.get('id_tipoequip'))
-        id_mo = int(request.POST.get('id_mo'))
-        nome_equip = request.POST.get('nome_equip')
-        desc_equip = request.POST.get('desc_equip')
-        custo_equip = Decimal(request.POST.get('custo_equip'))  # Convert to Decimal
-
-        with connection.cursor() as cursor:
-            try:
-                print(f"Equipamento : {id_tipoequip} {id_mo} {nome_equip} {desc_equip} {custo_equip}")
-                cursor.execute('CALL sp_equipamentos_create(%s, %s, %s, %s, %s)', [id_tipoequip, id_mo, nome_equip, desc_equip, custo_equip])
-                connection.commit()
-                print("Equipamento adicionado com sucesso!")
-
-                return redirect('equipamentos')
-
-            except Exception as e:
-                print(f"Exception type: {type(e)}")
-                print(f"Exception message: {str(e)}")
-                connection.rollback()
-                print("Erro ao adicionar equipamento!")
-
-    return HttpResponse("Erro ao adicionar equipamento!")
-
-def eliminar_equipamento(request, id):
-   
-    with connection.cursor() as cursor:
         try:
-            print("Equipamento : ", id)
-            cursor.execute('CALL sp_equipamentos_delete(%s)', [id])
+            dados = json.loads(request.body)
+            print(f"Received data for new equipment: {dados}")  # Debug print
             
-            connection.commit()
-            print("Equipamento eliminado com sucesso!")
-
-            return redirect('equipamentos')
-
+            with connection.cursor() as cursor:
+                cursor.execute('''
+                    CALL sp_Equipamentos_create(%s, %s, %s, %s, %s)
+                ''', [
+                    dados['idTipoEquip'],
+                    dados['idMo'],
+                    dados['nomeEquip'],
+                    dados['descEquip'],
+                    dados['custoEquip']
+                ])
+                
+                connection.commit()
+                print("Equipment added successfully!")  # Debug print
+                
+                return JsonResponse({
+                    'mensagem': 'Equipamento adicionado com sucesso',
+                    'refresh': True
+                })
+                
         except Exception as e:
-            print(f"Exception type: {type(e)}")
-            print(f"Exception message: {str(e)}")
-            connection.rollback()
-            print("Erro ao eliminar equipamento!")
+            print(f"Error adding equipment: {str(e)}")  # Debug print
+            return JsonResponse({
+                'erro': f'Erro ao adicionar equipamento: {str(e)}'
+            }, status=500)
+            
+    return JsonResponse({'erro': 'Método não permitido'}, status=405)
 
-    return HttpResponse("Erro ao eliminar equipamento!")
+@csrf_exempt
+def excluir_equipamento(request, id):
+    if request.method == 'POST':
+        try:
+            print(f"Attempting to delete equipment with ID: {id}")
+            
+            with connection.cursor() as cursor:
+                cursor.execute('CALL sp_Equipamentos_delete(%s)', [id])
+                connection.commit()
+                print(f"Equipment {id} deleted successfully!")
+                
+                return JsonResponse({
+                    'mensagem': 'Equipamento excluído com sucesso',
+                    'refresh': True
+                })
+                
+        except Exception as e:
+            print(f"Error deleting equipment: {str(e)}")
+            return JsonResponse({
+                'erro': f'Erro ao excluir equipamento: {str(e)}'
+            }, status=500)
+            
+    return JsonResponse({'erro': 'Método não permitido'}, status=405)
 
+@csrf_exempt  # Only if you're having CSRF issues
 def editar_equipamento(request, id):
     if request.method == 'POST':
         try:
-            dados_json = json.loads(request.body)
-
-            novoTipoEquip = dados_json.get('idTipoEquip')
-            novoMO = dados_json.get('idMO')
-            novoNomeEquip = dados_json.get('nomeEquip')
-            novaDescEquip = dados_json.get('descEquip')
-            novoCustoEquip = dados_json.get('custoEquip')
-
-            print(f"Equipamento : {id} {novoTipoEquip} {novoMO} {novoNomeEquip} {novaDescEquip} {novoCustoEquip}")
-
-            # Lógic
-
-            # Execute o procedimento armazenado para editar o equipamento
+            dados = json.loads(request.body)
+            print(f"Received data: {dados}")  # Debug print
+            
             with connection.cursor() as cursor:
-                cursor.execute('CALL sp_Equipamentos_update(%s, %s, %s, %s, %s, %s)', [id, novoTipoEquip, novoMO, novoNomeEquip, novaDescEquip, novoCustoEquip])
-                # Confirme a transação
+                cursor.execute('''
+                    CALL sp_Equipamentos_update(%s, %s, %s, %s, %s, %s)
+                ''', [
+                    id,
+                    dados['idTipoEquip'],
+                    dados['idMo'],
+                    dados['nomeEquip'],
+                    dados['descEquip'],
+                    dados['custoEquip']
+                ])
+                
                 connection.commit()
-                print("Equipamento editado com sucesso!")
-
-
-
-     # Exemplo de retorno de uma resposta de sucesso
-            response_data = {'mensagem': 'Equipamento editado com sucesso', 'refresh': True}
-            return JsonResponse(response_data)
-
-        except json.JSONDecodeError as e:
-            return JsonResponse({'erro': 'Erro ao decodificar JSON'}, status=400)
-
-    # Se não for uma solicitação POST, retorne uma resposta de erro
+                print("Equipment updated successfully!")  # Debug print
+                
+                return JsonResponse({
+                    'mensagem': 'Equipamento atualizado com sucesso',
+                    'refresh': True
+                })
+                
+        except Exception as e:
+            print(f"Error updating equipment: {str(e)}")  # Debug print
+            return JsonResponse({
+                'erro': f'Erro ao atualizar equipamento: {str(e)}'
+            }, status=500)
+            
     return JsonResponse({'erro': 'Método não permitido'}, status=405)
 #---------------------------------------------------------------------------------------------------------------------
 

@@ -21,6 +21,12 @@
         
         <input type="search" class="form-control mb-3" id="pesquisa" placeholder="Pesquisar por qualquer elemento de um equipamento">
 
+        <div class="mb-3">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addEquipamentoModal">
+                Adicionar Equipamento
+            </button>
+        </div>
+
         <table class="table">
             <thead>
                 <tr>
@@ -35,20 +41,25 @@
             <tbody>
                 {% for equipamento in equipamentos %}
                 <tr>
-                    <td>{{ equipamento.tipo_equipamento.NOME_TIPOEQUIP }}</td>
-                    <td>{{ equipamento.mao_obra.NOME_MO }}</td>
+                    <td>{{ equipamento.TIPO_EQUIPAMENTO_NOME }}</td>
+                    <td>{{ equipamento.MAO_OBRA_NOME }}</td>
                     <td>{{ equipamento.NOME_EQUIP }}</td>
                     <td>{{ equipamento.DESC_EQUIP }}</td>
                     <td>{{ equipamento.CUSTO_EQUIP }}</td>
                     <td>
-                        {% if tem_permissao %}
-                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editEquipamentoModal"
-                            data-id-equipamento="{{ equipamento.ID_EQUIP }}" data-id-tipo-equip="{{ equipamento.ID_TIPOEQUIP }}"
-                            data-id-mo="{{ equipamento.ID_MO }}" data-nome-equip="{{ equipamento.NOME_EQUIP }}"
-                            data-desc-equip="{{ equipamento.DESC_EQUIP }}" data-custo-equip="{{ equipamento.CUSTO_EQUIP }}">Editar</button>
-                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteEquipamentoModal"
-                            onclick="excluirEquipamento({{ equipamento.ID_EQUIP }})">Eliminar</button>
-                        {% endif %}
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" 
+                            data-target="#editEquipamentoModal"
+                            data-id="{{ equipamento.ID_EQUIP }}"
+                            data-tipo-equip="{{ equipamento.ID_TIPOEQUIP }}"
+                            data-mo="{{ equipamento.ID_MO }}"
+                            data-nome="{{ equipamento.NOME_EQUIP }}"
+                            data-desc="{{ equipamento.DESC_EQUIP }}"
+                            data-custo="{{ equipamento.CUSTO_EQUIP }}">
+                            Editar
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteEquipamento({{ equipamento.ID_EQUIP }})">
+                            Eliminar
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -62,108 +73,120 @@
                 <div class="modal-header">
                     <h5 class="modal-title">Editar Equipamento</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <input type="hidden" class="form-control" id="edit_Id_Equip" name="edit_Id_Equip" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_ID_tipoEquip">Id do Tipo de Equipamento</label>
-                        <input type="text" class="form-control" id="edit_ID_tipoEquip" name="edit_ID_tipoEquip">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_ID_MO">Id da MO</label>
-                        <input type="text" class="form-control" id="edit_ID_MO" name="edit_ID_MO">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_Nome_Equip">Nome do Equipamento</label>
-                        <input type="text" class="form-control" id="edit_Nome_Equip" name="edit_Nome_Equip">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_Desc_Equip">Descrição do Equipamento</label>
-                        <input type="text" class="form-control" id="edit_Desc_Equip" name="edit_Desc_Equip">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit_Custo_Equip">Custo do Equipamento</label>
-                        <input type="text" class="form-control" id="edit_Custo_Equip" name="edit_Custo_Equip">
-                    </div>
+                    <form id="editForm">
+                        <input type="hidden" id="edit_id">
+                        <div class="form-group">
+                            <label for="edit_tipo_equip">Tipo de Equipamento</label>
+                            <select class="form-control" id="edit_tipo_equip" required>
+                                {% for tipo in tipos_equipamento %}
+                                    <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_mo">Mão de Obra</label>
+                            <select class="form-control" id="edit_mo" required>
+                                {% for mo in maos_obra %}
+                                    <option value="{{ mo.0 }}">{{ mo.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_nome_equip">Nome do Equipamento</label>
+                            <input type="text" class="form-control" id="edit_nome_equip" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_desc_equip">Descrição</label>
+                            <textarea class="form-control" id="edit_desc_equip" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_custo_equip">Custo</label>
+                            <input type="number" step="0.01" class="form-control" id="edit_custo_equip" required>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                    <button type="button" class="btn btn-primary"
-                        onclick="enviarDadosEdicaoEquipamento()">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEquipamento()">Salvar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="deleteEquipamentoModal" tabindex="-1" role="dialog"
-        aria-labelledby="deleteEquipamentoModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteEquipamentoModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteEquipamentoModalLabel">Eliminar Equipamento</h5>
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p>Tem a certeza de que deseja eliminar este equipamento?</p>
+                    <p>Tem certeza que deseja excluir este equipamento?</p>
                 </div>
                 <div class="modal-footer">
-                    <a id="linkExclusao" class="btn btn-danger" href="#">Eliminar</a>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">Excluir</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="addEquipamentoModal" tabindex="-1" role="dialog"
-    aria-labelledby="addEquipamentoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addEquipamentoModalLabel">Adicionar Equipamento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="addEquipamentoForm" method="post" action="{% url 'adicionar_equipamento' %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="id_tipoequip">ID TipoEquip</label>
-                        <input type="text" class="form-control" id="id_tipoequip" name="id_tipoequip"
-                            placeholder="Introduza o ID TipoEquip" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_mo">ID MO</label>
-                        <input type="text" class="form-control" id="id_mo" name="id_mo"
-                            placeholder="Introduza o ID MO" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nome_equip">Nome do Equipamento</label>
-                        <input type="text" class="form-control" id="nome_equip" name="nome_equip"
-                            placeholder="Introduza o nome do equipamento" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="desc_equip">Descrição do Equipamento</label>
-                        <textarea class="form-control" id="desc_equip" name="desc_equip"
-                            placeholder="Introduza a descrição do equipamento" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="custo_equip">Custo do Equipamento</label>
-                        <input type="text" class="form-control" id="custo_equip" name="custo_equip"
-                            placeholder="Introduza o custo do equipamento" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Adicionar</button>
-                </form>
+    <div class="modal fade" id="addEquipamentoModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Novo Equipamento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addForm">
+                        <div class="form-group">
+                            <label for="add_tipo_equip">Tipo de Equipamento</label>
+                            <select class="form-control" id="add_tipo_equip" required>
+                                <option value="">Selecione o tipo</option>
+                                {% for tipo in tipos_equipamento %}
+                                    <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="add_mo">Mão de Obra</label>
+                            <select class="form-control" id="add_mo" required>
+                                <option value="">Selecione a mão de obra</option>
+                                {% for mo in maos_obra %}
+                                    <option value="{{ mo.0 }}">{{ mo.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="add_nome_equip">Nome do Equipamento</label>
+                            <input type="text" class="form-control" id="add_nome_equip" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add_desc_equip">Descrição</label>
+                            <textarea class="form-control" id="add_desc_equip" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="add_custo_equip">Custo</label>
+                            <input type="number" step="0.01" class="form-control" id="add_custo_equip" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="addEquipamento()">Adicionar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
@@ -185,64 +208,148 @@
     </script>
 
     <script>
-        $('#editEquipamentoModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var idEquipamento = button.data('id-equipamento');
-            var idTipoEquip = button.data('id-tipo-equip');
-            var idMO = button.data('id-mo');
-            var nomeEquip = button.data('nome-equip');
-            var descEquip = button.data('desc-equip');
-            var custoEquip = button.data('custo-equip');
+        let currentEquipamentoId = null;
 
-            document.getElementById('edit_Id_Equip').value = idEquipamento;
-            document.getElementById('edit_ID_tipoEquip').value = idTipoEquip;
-            document.getElementById('edit_ID_MO').value = idMO;
-            document.getElementById('edit_Nome_Equip').value = nomeEquip;
-            document.getElementById('edit_Desc_Equip').value = descEquip;
-            document.getElementById('edit_Custo_Equip').value = custoEquip;
+        // When the edit modal is shown, populate the form
+        $('#editEquipamentoModal').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget);
+            const id = button.data('id');
+            const tipoEquip = button.data('tipo-equip');
+            const mo = button.data('mo');
+            const nome = button.data('nome');
+            const desc = button.data('desc');
+            const custo = button.data('custo');
+
+            const modal = $(this);
+            modal.find('#edit_id').val(id);
+            modal.find('#edit_tipo_equip').val(tipoEquip);
+            modal.find('#edit_mo').val(mo);
+            modal.find('#edit_nome_equip').val(nome);
+            modal.find('#edit_desc_equip').val(desc);
+            modal.find('#edit_custo_equip').val(custo);
         });
 
-        function enviarDadosEdicaoEquipamento() {
-            var idEquipamento = document.getElementById('edit_Id_Equip').value;
-            var idTipoEquip = document.getElementById('edit_ID_tipoEquip').value;
-            var idMO = document.getElementById('edit_ID_MO').value;
-            var nomeEquip = document.getElementById('edit_Nome_Equip').value;
-            var descEquip = document.getElementById('edit_Desc_Equip').value;
-            var custoEquip = document.getElementById('edit_Custo_Equip').value;
-
-            var dadosEdicao = {
-                idEquipamento: idEquipamento,
-                idTipoEquip: idTipoEquip,
-                idMO: idMO,
-                nomeEquip: nomeEquip,
-                descEquip: descEquip,
-                custoEquip: custoEquip
+        function saveEquipamento() {
+            const id = $('#edit_id').val();
+            const data = {
+                idTipoEquip: $('#edit_tipo_equip').val(),
+                idMo: $('#edit_mo').val(),
+                nomeEquip: $('#edit_nome_equip').val(),
+                descEquip: $('#edit_desc_equip').val(),
+                custoEquip: $('#edit_custo_equip').val()
             };
 
-            $.ajax({
-                type: 'POST',
-                url: '/editar_equipamento/' + idEquipamento + '/',
-                data: JSON.stringify(dadosEdicao),
-                contentType: 'application/json',
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            fetch(`/editar_equipamento/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
                 },
-                success: function (response) {
-                    console.log('Dados enviados com sucesso para a view de edição:', response);
-                    $('#editEquipamentoModal').modal('hide');
-                    location.reload();
-                },
-                error: function (error) {
-                    console.error('Erro ao enviar dados para a view de edição:', error);
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
+                return response.json();
+            })
+            .then(data => {
+                if (data.refresh) {
+                    window.location.reload();
+                } else if (data.erro) {
+                    alert(data.erro);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erro ao salvar equipamento');
             });
         }
 
-        function excluirEquipamento(equipamentoId) {
-            var linkExclusao = '/eliminar_equipamento/' + equipamentoId + '/';
-            document.getElementById('linkExclusao').href = linkExclusao;
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
-            $('#deleteEquipamentoModal').modal('show');
+        function deleteEquipamento(id) {
+            if (confirm('Tem certeza que deseja excluir este equipamento?')) {
+                fetch(`/excluir_equipamento/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.refresh) {
+                        window.location.reload();
+                    } else if (data.erro) {
+                        alert(data.erro);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erro ao excluir equipamento');
+                });
+            }
+        }
+
+        function addEquipamento() {
+            const data = {
+                idTipoEquip: $('#add_tipo_equip').val(),
+                idMo: $('#add_mo').val(),
+                nomeEquip: $('#add_nome_equip').val(),
+                descEquip: $('#add_desc_equip').val(),
+                custoEquip: $('#add_custo_equip').val()
+            };
+
+            // Validate form
+            if (!data.idTipoEquip || !data.idMo || !data.nomeEquip || !data.descEquip || !data.custoEquip) {
+                alert('Por favor, preencha todos os campos');
+                return;
+            }
+
+            fetch('/adicionar_equipamento/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.refresh) {
+                    window.location.reload();
+                } else if (data.erro) {
+                    alert(data.erro);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Erro ao adicionar equipamento');
+            });
         }
     </script>
 </body>
