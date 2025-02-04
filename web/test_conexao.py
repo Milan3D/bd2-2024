@@ -1,9 +1,9 @@
 import psycopg2
 
-dbname = 'bd2_postgres'
-user = 'bd2_postgres_user'
-password = '9yu4SjRH5MUWa1mfxYSPyJHPl2Kn9RaA'
-host = 'dpg-cmhpknen7f5s739ugg4g-a.frankfurt-postgres.render.com'
+dbname = 'bd2-2024'
+user = 'postgres'
+password = 'admin'
+host = 'localhost'
 port = '5432'
 
 try:

@@ -19,7 +19,7 @@ urlpatterns = [
     path('equipamento/<int:id>/', view=views.equipamento, name='equipamento'),
 
     path('componentes/', views.componentes, name='componentes'),
-    path('adicionar_componente /', views.adicionar_componente, name='adicionar_componente'),
+    path('adicionar_componente/', views.adicionar_componente, name='adicionar_componente'),
     path('editar_componente/<int:id>/', views.editar_componente, name='editar_componente'),
     path('eliminar_componente/<int:id>/', views.eliminar_componente, name='eliminar_componente'),
 

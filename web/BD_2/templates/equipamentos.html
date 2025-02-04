@@ -24,9 +24,8 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID Equip</th>
-                    <th>ID TipoEquip</th>
-                    <th>ID MO</th>
+                    <th>Tipo de Equipamento</th>
+                    <th>Mão de Obra</th>
                     <th>Nome Equip</th>
                     <th>Desc Equip</th>
                     <th>Custo Equip</th>
@@ -36,20 +35,19 @@
             <tbody>
                 {% for equipamento in equipamentos %}
                 <tr>
-                    <td>{{ equipamento.ID_EQUIP }}</td>
-                    <td>{{ equipamento.ID_TIPOEQUIP }}</td>
-                    <td>{{ equipamento.ID_MO }}</td>
+                    <td>{{ equipamento.tipo_equipamento.NOME_TIPOEQUIP }}</td>
+                    <td>{{ equipamento.mao_obra.NOME_MO }}</td>
                     <td>{{ equipamento.NOME_EQUIP }}</td>
                     <td>{{ equipamento.DESC_EQUIP }}</td>
                     <td>{{ equipamento.CUSTO_EQUIP }}</td>
                     <td>
                         {% if tem_permissao %}
-                <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editEquipamentoModal"
-                    data-id-equipamento="{{ equipamento.ID_EQUIP }}" data-id-tipo-equip="{{ equipamento.ID_TIPOEQUIP }}"
-                    data-id-mo="{{ equipamento.ID_MO }}" data-nome-equip="{{ equipamento.NOME_EQUIP }}"
-                    data-desc-equip="{{ equipamento.DESC_EQUIP }}" data-custo-equip="{{ equipamento.CUSTO_EQUIP }}">Editar</button>
-                <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteEquipamentoModal"
-                    onclick="excluirEquipamento({{ equipamento.ID_EQUIP }})">Eliminar</button>
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editEquipamentoModal"
+                            data-id-equipamento="{{ equipamento.ID_EQUIP }}" data-id-tipo-equip="{{ equipamento.ID_TIPOEQUIP }}"
+                            data-id-mo="{{ equipamento.ID_MO }}" data-nome-equip="{{ equipamento.NOME_EQUIP }}"
+                            data-desc-equip="{{ equipamento.DESC_EQUIP }}" data-custo-equip="{{ equipamento.CUSTO_EQUIP }}">Editar</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteEquipamentoModal"
+                            onclick="excluirEquipamento({{ equipamento.ID_EQUIP }})">Eliminar</button>
                         {% endif %}
                     </td>
                 </tr>

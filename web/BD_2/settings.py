@@ -77,10 +77,10 @@ WSGI_APPLICATION = 'BD_2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'bd2_postgres',
-        'USER': 'bd2_postgres_user',
-        'PASSWORD': '9yu4SjRH5MUWa1mfxYSPyJHPl2Kn9RaA',
-        'HOST': 'dpg-cmhpknen7f5s739ugg4g-a.frankfurt-postgres.render.com',
+        'NAME': 'bd2-2024',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': 'localhost',
         'PORT': '5432',
     },
     'mongodb': {

@@ -72,43 +72,61 @@ def equipamentos(request):
     
     with connection.cursor() as cursor:
         try:
-            # Use SELECT to call the function and retrieve results
+            # Get equipment list
+            print("Fetching equipment list...")
             cursor.execute('SELECT * FROM public.fn_equipamentos_list()')
-
-            # Retrieve all results
             resultados = cursor.fetchall()
-
-            # Print the results
-            for resultado in resultados:
-                print(resultado)
+            print(f"Equipment results: {resultados}")
             
-            # Create a list of dictionaries from the results
             equipamentos = []
             for resultado in resultados:
-                # Check if the tuple has the expected number of elements
-                if len(resultado) >= 6:
-                    equipamento = {
-                        'ID_EQUIP': resultado[0],
-                        'ID_TIPOEQUIP': resultado[1],
-                        'ID_MO': resultado[2],
-                        'NOME_EQUIP': resultado[3],
-                        'DESC_EQUIP': resultado[4],
-                        'CUSTO_EQUIP': resultado[5],
+                print(f"Processing equipment: {resultado}")
+                try:
+                    # Get tipo_equipamento name
+                    cursor.execute('SELECT * FROM public.fn_tipoequipamentos_list() WHERE id_tipoequip = %s', [resultado[1]])
+                    tipo_nome = cursor.fetchone()
+                    print(f"Tipo equipment result: {tipo_nome}")
+                except Exception as e:
+                    print(f"Error fetching tipo_equipamento: {str(e)}")
+                    tipo_nome = None
+                
+                try:
+                    # Get mao_obra name
+                    cursor.execute('SELECT * FROM public.fn_mo_list() WHERE id_mo = %s', [resultado[2]])
+                    mo_nome = cursor.fetchone()
+                    print(f"Mao obra result: {mo_nome}")
+                except Exception as e:
+                    print(f"Error fetching mao_obra: {str(e)}")
+                    mo_nome = None
+                
+                equipamento = {
+                    'ID_EQUIP': resultado[0],
+                    'ID_TIPOEQUIP': resultado[1],
+                    'ID_MO': resultado[2],
+                    'NOME_EQUIP': resultado[3],
+                    'DESC_EQUIP': resultado[4],
+                    'CUSTO_EQUIP': resultado[5],
+                    'tipo_equipamento': {
+                        'NOME_TIPOEQUIP': tipo_nome[1] if tipo_nome else 'N/A'  # Assuming name is second column
+                    },
+                    'mao_obra': {
+                        'NOME_MO': mo_nome[1] if mo_nome else 'N/A'  # Assuming name is second column
                     }
-                    equipamentos.append(equipamento)
-                else:
-                    print(f"Unexpected tuple length: {len(resultado)}")
+                }
+                equipamentos.append(equipamento)
+                print(f"Added equipment to list: {equipamento}")
 
         except Exception as e:
-            # Handle exceptions (print or log the error, handle as needed)
-            print(f"Exception type: {type(e)}")
-            print(f"Exception message: {str(e)}")
+            print(f"Main exception type: {type(e)}")
+            print(f"Main exception message: {str(e)}")
+            print(f"Main exception details:", e)
             equipamentos = []
 
     context = {
         'equipamentos': equipamentos,
         'tem_permissao': tem_permissao,
     }
+    print(f"Final context: {context}")
     return render(request, 'equipamentos.html', context)
 
 
