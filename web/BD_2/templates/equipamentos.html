@@ -8,6 +8,22 @@
     <title>Equipamentos</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        .pagination {
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .pagination .page-link {
+            color: #007bff;
+        }
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+        }
+    </style>
 </head>
 
 <body>
@@ -27,44 +43,51 @@
             </button>
         </div>
 
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Tipo de Equipamento</th>
-                    <th>Mão de Obra</th>
-                    <th>Nome Equip</th>
-                    <th>Desc Equip</th>
-                    <th>Custo Equip</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for equipamento in equipamentos %}
-                <tr>
-                    <td>{{ equipamento.TIPO_EQUIPAMENTO_NOME }}</td>
-                    <td>{{ equipamento.MAO_OBRA_NOME }}</td>
-                    <td>{{ equipamento.NOME_EQUIP }}</td>
-                    <td>{{ equipamento.DESC_EQUIP }}</td>
-                    <td>{{ equipamento.CUSTO_EQUIP }}</td>
-                    <td>
-                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" 
-                            data-target="#editEquipamentoModal"
-                            data-id="{{ equipamento.ID_EQUIP }}"
-                            data-tipo-equip="{{ equipamento.ID_TIPOEQUIP }}"
-                            data-mo="{{ equipamento.ID_MO }}"
-                            data-nome="{{ equipamento.NOME_EQUIP }}"
-                            data-desc="{{ equipamento.DESC_EQUIP }}"
-                            data-custo="{{ equipamento.CUSTO_EQUIP }}">
-                            Editar
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteEquipamento({{ equipamento.ID_EQUIP }})">
-                            Eliminar
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Tipo de Equipamento</th>
+                        <th>Mão de Obra</th>
+                        <th>Nome Equip</th>
+                        <th>Desc Equip</th>
+                        <th>Custo Equip</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="equipamentosTableBody">
+                    {% for equipamento in equipamentos %}
+                    <tr class="equipamento-row" style="display: none;">
+                        <td>{{ equipamento.TIPO_EQUIPAMENTO_NOME }}</td>
+                        <td>{{ equipamento.MAO_OBRA_NOME }}</td>
+                        <td>{{ equipamento.NOME_EQUIP }}</td>
+                        <td>{{ equipamento.DESC_EQUIP }}</td>
+                        <td>{{ equipamento.CUSTO_EQUIP }}</td>
+                        <td>
+                            <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" 
+                                data-target="#editEquipamentoModal"
+                                data-id="{{ equipamento.ID_EQUIP }}"
+                                data-tipo-equip="{{ equipamento.ID_TIPOEQUIP }}"
+                                data-mo="{{ equipamento.ID_MO }}"
+                                data-nome="{{ equipamento.NOME_EQUIP }}"
+                                data-desc="{{ equipamento.DESC_EQUIP }}"
+                                data-custo="{{ equipamento.CUSTO_EQUIP }}">
+                                Editar
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="deleteEquipamento({{ equipamento.ID_EQUIP }})">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination" id="pagination">
+            </ul>
+        </nav>
     </div>
 
     <div class="modal fade" id="editEquipamentoModal" tabindex="-1" role="dialog">
@@ -351,6 +374,100 @@
                 alert('Erro ao adicionar equipamento');
             });
         }
+
+        $(document).ready(function() {
+            const itemsPerPage = 8;
+            const $rows = $('.equipamento-row');
+            const totalPages = Math.ceil($rows.length / itemsPerPage);
+            let currentPage = 1;
+
+            function showPage(page) {
+                const start = (page - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+
+                $rows.hide();
+                $rows.slice(start, end).show();
+                updatePagination(page);
+            }
+
+            function updatePagination(currentPage) {
+                const $pagination = $('#pagination');
+                $pagination.empty();
+
+                // Previous button
+                $pagination.append(`
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                `);
+
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    if (
+                        i === 1 || 
+                        i === totalPages || 
+                        (i >= currentPage - 1 && i <= currentPage + 1)
+                    ) {
+                        $pagination.append(`
+                            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                                <a class="page-link" href="#" data-page="${i}">${i}</a>
+                            </li>
+                        `);
+                    } else if (
+                        i === currentPage - 2 || 
+                        i === currentPage + 2
+                    ) {
+                        $pagination.append(`
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        `);
+                    }
+                }
+
+                // Next button
+                $pagination.append(`
+                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                `);
+            }
+
+            // Event handler for pagination clicks
+            $(document).on('click', '.page-link', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page && page >= 1 && page <= totalPages) {
+                    currentPage = page;
+                    showPage(currentPage);
+                }
+            });
+
+            // Update search function to reset pagination
+            $("#pesquisa").on("keyup", function() {
+                const value = $(this).val().toLowerCase();
+                $rows.each(function() {
+                    const $row = $(this);
+                    const text = $row.text().toLowerCase();
+                    $row.toggleClass('filtered', text.indexOf(value) === -1);
+                });
+                
+                currentPage = 1;
+                const $visibleRows = $rows.not('.filtered');
+                const newTotalPages = Math.ceil($visibleRows.length / itemsPerPage);
+                
+                $visibleRows.hide();
+                $visibleRows.slice(0, itemsPerPage).show();
+                updatePagination(1);
+            });
+
+            // Show initial page
+            showPage(1);
+        });
     </script>
 </body>
 </html>
