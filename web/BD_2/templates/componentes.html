@@ -16,11 +16,14 @@
 
     <div class="container mt-5">
         <h2>Lista de Componentes</h2>
+        
+        <!-- Moved Add Button to top -->
+        <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addComponenteModal">Adicionar Componente</button>
+        
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID Componente</th>
-                    <th>ID Categoria de Componentes</th>
+                    <th>Categoria de Componentes</th>
                     <th>Nome Componente</th>
                     <th>Descrição Componente</th>
                     <th>Preço Médio Componente</th>
@@ -29,30 +32,33 @@
             </thead>
             <tbody>
                 {% for componente in componentes %}
-                <tr>
-                    <td>{{ componente.ID_COMPONENTE }}</td>
-                    <td>{{ componente.ID_CATCOMPONENTES }}</td>
+                <tr class="componente-row">
+                    <td>{{ componente.categoria.NOME_CATCOMPONENTES }}</td>
                     <td>{{ componente.NOME_COMPONENTE }}</td>
                     <td>{{ componente.DESCRICAO_COMPONENTE }}</td>
                     <td>{{ componente.PRECOMEDIO_COMPONENTE }}</td>
                     <td>
-                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
-                            data-target="#deleteComponenteModal"
-                            onclick="excluirComponente({{ componente.ID_COMPONENTE }})">Excluir</button>
-                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
-                            data-target="#editComponenteModal" data-id-componente="{{ componente.ID_COMPONENTE }}"
+                        <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" 
+                            data-target="#editComponenteModal" 
+                            data-id-componente="{{ componente.ID_COMPONENTE }}"
                             data-id-catcomponente="{{ componente.ID_CATCOMPONENTES }}"
                             data-nome-componente="{{ componente.NOME_COMPONENTE }}"
                             data-desc-componente="{{ componente.DESCRICAO_COMPONENTE }}"
                             data-preco-componente="{{ componente.PRECOMEDIO_COMPONENTE }}">Editar</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
+                            data-target="#deleteComponenteModal"
+                            onclick="excluirComponente({{ componente.ID_COMPONENTE }})">Excluir</button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <!-- Botão para Adicionar Componente -->
-        <button class="btn btn-success" data-toggle="modal" data-target="#addComponenteModal">Adicionar Componente</button>
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center" id="pagination">
+            </ul>
+        </nav>
     </div>
 
     <!-- Modal para Editar Componente -->
@@ -118,48 +124,59 @@
     </div>
 
     <!-- Modal para Adicionar Componente -->
-    <div class="modal fade" id="addComponenteModal" tabindex="-1" role="dialog"
-        aria-labelledby="addComponenteModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addComponenteModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addComponenteModalLabel">Adicionar Componente</h5>
+                    <h5 class="modal-title">Adicionar Componente</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!-- Formulário para Adicionar Componente -->
-                    <form id="addComponenteForm" method="post" action="{% url 'adicionar_componente' %}">
+                    <form id="addComponenteForm">
                         {% csrf_token %}
-                        <!-- Campos do formulário -->
                         <div class="form-group">
-                            <label for="id_catcomponentes">ID Categoria de Componentes</label>
-                            <input type="text" class="form-control" id="id_catcomponentes" name="id_catcomponentes"
-                                placeholder="Digite o ID Categoria de Componentes">
+                            <label for="id_catcomponentes">Categoria de Componentes</label>
+                            <select class="form-control" id="id_catcomponentes" name="id_catcomponentes" required>
+                                <option value="">Selecione uma categoria</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="nome_componente">Nome do Componente</label>
-                            <input type="text" class="form-control" id="nome_componente" name="nome_componente"
-                                placeholder="Digite o nome do componente">
+                            <input type="text" class="form-control" id="nome_componente" name="nome_componente" required>
                         </div>
                         <div class="form-group">
                             <label for="desc_componente">Descrição do Componente</label>
-                            <textarea class="form-control" id="desc_componente" name="desc_componente"
-                                placeholder="Digite a descrição do componente"></textarea>
+                            <textarea class="form-control" id="desc_componente" name="desc_componente" required></textarea>
                         </div>
                         <div class="form-group">
                             <label for="preco_componente">Preço Médio do Componente</label>
-                            <input type="text" class="form-control" id="preco_componente" name="preco_componente"
-                                placeholder="Digite o preço médio do componente">
+                            <input type="number" step="0.01" class="form-control" id="preco_componente" name="preco_componente" required>
                         </div>
-
-                        <!-- Botão de Submissão -->
-                        <button type="submit" class="btn btn-primary">Adicionar</button>
                     </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="adicionarComponente()">Adicionar</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Add success/error alert -->
+    <div class="alert alert-success alert-dismissible fade" role="alert" id="successAlert">
+        <span id="successMessage"></span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="alert alert-danger alert-dismissible fade" role="alert" id="errorAlert">
+        <span id="errorMessage"></span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -171,7 +188,117 @@
         crossorigin="anonymous"></script>
 
     <script>
-    $('#editComponenteModal').on('show.bs.modal', function (event) {
+    $(document).ready(function() {
+        const itemsPerPage = 8;
+        const $rows = $('.componente-row');
+        const totalPages = Math.ceil($rows.length / itemsPerPage);
+        
+        // Initial load of categories
+        loadCategorias();
+        
+        // Show first page
+        showPage(1);
+        
+        function showPage(page) {
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            
+            $rows.hide();
+            $rows.slice(start, end).show();
+            updatePagination(page);
+        }
+        
+        function updatePagination(currentPage) {
+            const $pagination = $('#pagination');
+            $pagination.empty();
+            
+            // Previous button
+            $pagination.append(`
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">&laquo;</a>
+                </li>
+            `);
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                $pagination.append(`
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `);
+            }
+            
+            // Next button
+            $pagination.append(`
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">&raquo;</a>
+                </li>
+            `);
+        }
+        
+        // Pagination click handler
+        $(document).on('click', '.page-link', function(e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            if (page && page >= 1 && page <= totalPages) {
+                showPage(page);
+            }
+        });
+    });
+
+    function loadCategorias(selectElement) {
+        console.log('Loading categories for select element:', selectElement);
+        
+        fetch('/categorias_componentes/', {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            console.log('Response received:', response);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Categories loaded:', data);
+            const select = $(selectElement);
+            console.log('Select element found:', select.length > 0);
+            
+            select.empty();
+            select.append('<option value="">Selecione uma categoria</option>');
+            
+            if (Array.isArray(data)) {
+                data.forEach(categoria => {
+                    console.log('Adding category:', categoria);
+                    const option = new Option(categoria.nome, categoria.id);
+                    select.append(option);
+                });
+            } else {
+                console.error('Data is not an array:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading categories:', error);
+            showAlert('error', 'Erro ao carregar categorias: ' + error);
+        });
+    }
+
+    // Update modal event listeners
+    $(document).ready(function() {
+        // Add modal event listener
+        $('#addComponenteModal').on('show.bs.modal', function (event) {
+            console.log('Add modal opening');
+            setTimeout(() => {
+                loadCategorias('#id_catcomponentes');
+            }, 100);
+        });
+
+        // Edit modal event listener
+        $('#editComponenteModal').on('show.bs.modal', function (event) {
+            console.log('Edit modal opening');
+            setTimeout(() => {
+                loadCategorias('#edit_ID_CatComponente');
+            }, 100);
+            
             var button = $(event.relatedTarget);
             var idComponente = button.data('id-componente');
             var idCatComponente = button.data('id-catcomponente');
@@ -179,67 +306,104 @@
             var descComponente = button.data('desc-componente');
             var precoComponente = button.data('preco-componente');
 
-            console.log('Valores antes de enviar AJAX:');
-            console.log('idComponente:', idComponente);
-            console.log('idCatComponente:', idCatComponente);
-            console.log('nomeComponente:', nomeComponente);
-            console.log('descComponente:', descComponente);
-            console.log('precoComponente:', precoComponente);
-
-            // Preencha os campos do formulário no modal com os dados do componente
             document.getElementById('edit_Id_Componente').value = idComponente;
             document.getElementById('edit_ID_CatComponente').value = idCatComponente;
             document.getElementById('edit_Nome_Componente').value = nomeComponente;
             document.getElementById('edit_Desc_Componente').value = descComponente;
             document.getElementById('edit_Preco_Componente').value = precoComponente;
         });
+    });
 
-        function enviarDadosEdicaoComponente() {
-            var idComponente = document.getElementById('edit_Id_Componente').value;
-            var idCatComponente = document.getElementById('edit_ID_CatComponente').value;
-            var nomeComponente = document.getElementById('edit_Nome_Componente').value;
-            var descComponente = document.getElementById('edit_Desc_Componente').value;
-            var precoComponente = document.getElementById('edit_Preco_Componente').value;
+    function enviarDadosEdicaoComponente() {
+        var idComponente = document.getElementById('edit_Id_Componente').value;
+        var idCatComponente = document.getElementById('edit_ID_CatComponente').value;
+        var nomeComponente = document.getElementById('edit_Nome_Componente').value;
+        var descComponente = document.getElementById('edit_Desc_Componente').value;
+        var precoComponente = document.getElementById('edit_Preco_Componente').value;
 
-            console.log('Valoreeeeeeeeeeeeessssssssss:');
-            console.log('idComponente:', idComponente);
-            console.log('idCatComponente:', idCatComponente);
-            console.log('nomeComponente:', nomeComponente);
-            console.log('descComponente:', descComponente);
-            console.log('precoComponente:', precoComponente);
+        console.log('Valoreeeeeeeeeeeeessssssssss:');
+        console.log('idComponente:', idComponente);
+        console.log('idCatComponente:', idCatComponente);
+        console.log('nomeComponente:', nomeComponente);
+        console.log('descComponente:', descComponente);
+        console.log('precoComponente:', precoComponente);
 
-            var dadosEdicao = {
-                idComponente: idComponente,
-                idCatComponente: idCatComponente,
-                nomeComponente: nomeComponente,
-                descComponente: descComponente,
-                precoComponente: precoComponente
-            };
+        var dadosEdicao = {
+            idComponente: idComponente,
+            idCatComponente: idCatComponente,
+            nomeComponente: nomeComponente,
+            descComponente: descComponente,
+            precoComponente: precoComponente
+        };
 
-            $.ajax({
-                type: 'POST',
-                url: '/editar_componente/' + idComponente + '/',
-                data: JSON.stringify(dadosEdicao),
-                contentType: 'application/json',
-                beforeSend: function (xhr) {
-                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-                },
-                success: function (response) {
-                    console.log('Dados enviados com sucesso para a view de edição:', response);
+        $.ajax({
+            type: 'POST',
+            url: '/editar_componente/' + idComponente + '/',
+            data: JSON.stringify(dadosEdicao),
+            contentType: 'application/json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            },
+            success: function (response) {
+                if (response.success) {
                     $('#editComponenteModal').modal('hide');
-                },
-                error: function (error) {
-                    console.error('Erro ao enviar dados para a view de edição:', error);
+                    showAlert('success', 'Componente editado com sucesso!');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showAlert('error', 'Erro ao editar componente: ' + response.error);
                 }
-            });
-        }
+            },
+            error: function (error) {
+                showAlert('error', 'Erro ao editar componente: ' + error.responseText);
+            }
+        });
+    }
 
-        function excluirComponente(componenteId) {
-            var linkExclusao = '/eliminar_componente/' + componenteId + '/';
-            document.getElementById('linkExclusao').href = linkExclusao;
+    function showAlert(type, message) {
+        const alertId = type === 'success' ? 'successAlert' : 'errorAlert';
+        const messageId = type === 'success' ? 'successMessage' : 'errorMessage';
+        
+        $(`#${messageId}`).text(message);
+        $(`#${alertId}`).addClass('show');
+        
+        setTimeout(() => {
+            $(`#${alertId}`).removeClass('show');
+        }, 3000);
+    }
 
-            $('#deleteComponenteModal').modal('show');
-        }
+    function excluirComponente(componenteId) {
+        var linkExclusao = '/eliminar_componente/' + componenteId + '/';
+        document.getElementById('linkExclusao').href = linkExclusao;
+
+        $('#deleteComponenteModal').modal('show');
+    }
+
+    function adicionarComponente() {
+        const formData = new FormData();
+        formData.append('id_catcomponentes', $('#id_catcomponentes').val());
+        formData.append('nome_componente', $('#nome_componente').val());
+        formData.append('desc_componente', $('#desc_componente').val());
+        formData.append('preco_componente', $('#preco_componente').val());
+
+        $.ajax({
+            type: 'POST',
+            url: '/adicionar_componente/',
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', $('[name=csrfmiddlewaretoken]').val());
+            },
+            success: function(response) {
+                $('#addComponenteModal').modal('hide');
+                showAlert('success', 'Componente adicionado com sucesso!');
+                setTimeout(() => location.reload(), 1500);
+            },
+            error: function(error) {
+                showAlert('error', 'Erro ao adicionar componente: ' + error.responseText);
+            }
+        });
+    }
     </script>
 </body>
 

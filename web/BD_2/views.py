@@ -340,42 +340,45 @@ def editar_encomenda(request, id):
 
 
 def componentes(request):
-    id_nivel = LocalStorage.get_id_nivel(request)
-    print(f"ID do nível recuperado da sessão: {id_nivel}")
-
-    if id_nivel == 1:
-        tem_permissao = True
-    else:
-        tem_permissao = False
     with connection.cursor() as cursor:
         try:
-            cursor.execute('SELECT * FROM public.fn_componentes_list()')
+            print("Starting componentes view function...")
+            
+            # Using correct table name 'categoriacomponentes'
+            cursor.execute("""
+                SELECT c.*, cat.nome_catcomponentes 
+                FROM componentes c
+                LEFT JOIN categoriacomponentes cat ON c.id_catcomponentes = cat.id_catcomponentes
+            """)
             resultados = cursor.fetchall()
-            precomedio_componente = request.POST.get('precomedio_componente')
-
+            print(f"Query results: {resultados}")
+            
             componentes = []
             for resultado in resultados:
-                if len(resultado) >= 4:
-                    componente = {
-                        'ID_COMPONENTE': resultado[0],
-                        'ID_CATCOMPONENTES': resultado[1],
-                        'NOME_COMPONENTE': resultado[2],
-                        'DESCRICAO_COMPONENTE': resultado[3],
-                        'PRECOMEDIO_COMPONENTE': resultado[4],
+                print(f"Processing row: {resultado}")
+                componente = {
+                    'ID_COMPONENTE': resultado[0],
+                    'ID_CATCOMPONENTES': resultado[1],
+                    'NOME_COMPONENTE': resultado[2],
+                    'DESCRICAO_COMPONENTE': resultado[3],
+                    'PRECOMEDIO_COMPONENTE': resultado[4],
+                    'categoria': {
+                        'NOME_CATCOMPONENTES': resultado[5] if resultado[5] else 'N/A'
                     }
-                    componentes.append(componente)
-                else:
-                    print(f"Unexpected tuple length: {len(resultado)}")
+                }
+                componentes.append(componente)
+                print(f"Added component: {componente}")
 
         except Exception as e:
-            print(f"Exception type: {type(e)}")
-            print(f"Exception message: {str(e)}")
+            print(f"Error occurred: {type(e)}")
+            print(f"Error message: {str(e)}")
+            print(f"Error details:", e)
             componentes = []
 
     context = {
         'componentes': componentes,
-                'tem_permissao': tem_permissao,
-}
+    }
+    print(f"Final context being sent to template: {context}")
     return render(request, 'componentes.html', context)
 
 def adicionar_componente(request):
@@ -697,6 +700,29 @@ def equipamento(request, id):
 
 
 def categorias_componentes(request):
+    # If it's an API request for the dropdown
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute('SELECT * FROM public.fn_categoriacomponentes_list()')
+                resultados = cursor.fetchall()
+                print("Raw results:", resultados)  # Debug print
+                
+                categorias = []
+                for resultado in resultados:
+                    categoria = {
+                        'id': resultado[0],
+                        'nome': resultado[1]
+                    }
+                    categorias.append(categoria)
+                    print("Added categoria:", categoria)  # Debug print
+                
+                print("Final categorias list:", categorias)  # Debug print
+                return JsonResponse(categorias, safe=False)
+            except Exception as e:
+                print(f"Error fetching categorias for dropdown: {str(e)}")
+                return JsonResponse({'error': str(e)}, status=500)
+
     id_nivel = LocalStorage.get_id_nivel(request)
     print(f"ID do nível recuperado da sessão: {id_nivel}")
 
@@ -2225,5 +2251,3 @@ def purchase_history(request):
     else:
         return HttpResponse('Usuário não autenticado.')
     
-
-
