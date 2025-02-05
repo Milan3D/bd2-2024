@@ -16,23 +16,45 @@
 
     <div class="container mt-5">
         <h2>Lista de Encomendas</h2>
+        
+        <!-- Success/Error Alert at the top -->
+        <div class="alert alert-success alert-dismissible fade" role="alert" id="successAlert">
+            <span id="successMessage"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="alert alert-danger alert-dismissible fade" role="alert" id="errorAlert">
+            <span id="errorMessage"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <!-- Search Box -->
+        <input type="text" id="searchBox" class="form-control mb-3" placeholder="Search for encomendas...">
+
+        <!-- Moved Add Button to top -->
+        <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addEncomendaModal">Adicionar Encomenda</button>
+        
         <table class="table">
             <thead>
                 <tr>
                     <th>ID Encomenda</th>
                     <th>ID Guia Compras</th>
                     <th>Data Encomenda</th>
-                    <th>ID Funcionário</th>
+                    <th>Funcionário</th>
                     <th>Ações</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="encomendasTableBody">
                 {% for encomenda in encomendas %}
-                <tr>
+                <tr class="encomenda-row">
                     <td>{{ encomenda.ID_ENCOMENDA }}</td>
                     <td>{{ encomenda.ID_GUIACOMPRAS }}</td>
                     <td>{{ encomenda.DATA_ENCOMENDA }}</td>
-                    <td>{{ encomenda.ID_FUNCIONARIO }}</td>
+                    <td>{{ encomenda.funcionario.NOME_FUNCIONARIO }}</td>
                     <td>
                         <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteEncomendaModal" onclick="excluirEncomenda({{ encomenda.ID_ENCOMENDA }})">Excluir</button>
                         <button type="button" class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editEncomendaModal" data-id-encomenda="{{ encomenda.ID_ENCOMENDA }}" data-id-guiacompras="{{ encomenda.ID_GUIACOMPRAS }}" data-data-encomenda="{{ encomenda.DATA_ENCOMENDA }}" data-id-funcionario="{{ encomenda.ID_FUNCIONARIO }}">Editar</button>
@@ -42,8 +64,11 @@
             </tbody>
         </table>
 
-        <!-- Botão para Adicionar Encomenda -->
-        <button class="btn btn-success" data-toggle="modal" data-target="#addEncomendaModal">Adicionar Encomenda</button>
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center" id="pagination">
+            </ul>
+        </nav>
     </div>
 
     <!-- Modal para Editar Encomenda -->
@@ -194,6 +219,18 @@
 
             $('#deleteEncomendaModal').modal('show');
         }
+
+        $(document).ready(function() {
+            // Search functionality
+            $('#searchBox').on('keyup', function() {
+                const searchTerm = $(this).val().toLowerCase();
+                $('.encomenda-row').filter(function() {
+                    $(this).toggle(
+                        $(this).text().toLowerCase().indexOf(searchTerm) > -1
+                    );
+                });
+            });
+        });
     </script>
 </body>
 </html>
