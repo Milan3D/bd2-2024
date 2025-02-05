@@ -22,14 +22,24 @@
     
                     <form method="POST" class="card-body cardbody-color p-lg-5">
                         {% csrf_token %}
+                        
+                        <!-- Add error message display -->
+                        {% if messages %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
                         <div class="text-center">
                             <img src="https://i.imgur.com/JkUK7KI.png" class="img-fluid profile-image-pic my-3"
                                 width="200px" alt="profile">
                         </div>
     
                         <div class="mb-3">
-                            <label for="Username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required>
+                            <label for="Username" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="username" name="username" required>
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>

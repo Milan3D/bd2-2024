@@ -85,8 +85,7 @@ DATABASES = {
     },
     'mongodb': {
         'ENGINE': 'djongo',
-        'NAME': 'BD_2_PROJ',
-        'ENFORCE_SCHEMA': False,
+        'NAME': 'BD_2',
         'CLIENT': {
             'host': 'localhost',
             'port': 27017,
