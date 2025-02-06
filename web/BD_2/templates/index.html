@@ -73,12 +73,12 @@
                                     <form method="post" action="{% url 'login' %}">
                                         {% csrf_token %}
                                         <div class="form-group">
-                                            <label for="username">Utilizador:</label>
-                                            <input type="text" class="form-control" id="username" name="id_utilpgestao" placeholder="Utilizador" pattern="[0-9]+" title="Apenas números são permitidos">
+                                            <label for="username">Email:</label>
+                                            <input type="text" class="form-control" id="username" name="id_utilpgestao" placeholder="Email" required>
                                         </div>
                                         <div class="form-group mb-5">
                                             <label for="password">Password:</label>
-                                            <input type="password" class="form-control" id="password" name="password_pgestao" placeholder="Entrar">
+                                            <input type="password" class="form-control" id="password" name="password_pgestao" placeholder="Entrar" required>
                                         </div>
                                         <button type="submit" class="btn btn-theme float-right">Entrar</button>
                                     </form>

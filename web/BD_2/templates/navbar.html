@@ -43,6 +43,9 @@
             </li>                      
         </ul>
         <div class="navbar-nav ml-auto">
+            <span class="navbar-text mr-3">
+                {{ request.session.user_name|default:"User not logged in" }}
+            </span>
             <a class="btn btn-danger" href="{% url 'index' %}">Terminar sessão</a>
         </div>
     </div>

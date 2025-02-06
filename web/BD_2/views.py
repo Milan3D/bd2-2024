@@ -40,24 +40,58 @@ def homepage_utilizador(request):
 
 def login(request):
     if request.method == 'POST':
-        id_utilpgestao = request.POST.get('id_utilpgestao')
-        password_pgestao = request.POST.get('password_pgestao')
+        email = request.POST.get('id_utilpgestao')  # This is the email field
+        password = request.POST.get('password_pgestao')
 
-        # Verificar se o id_utilpgestao e a senha correspondem na tabela acesso_pgestao
-        user = acesso_pgestao.objects.filter(id_utilpgestao=id_utilpgestao, password_pgestao=password_pgestao).first()
+        # Step 1: Retrieve all funcionarios and check for the email
+        funcionarios = []
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute('SELECT * FROM public.fn_funcionarios_list()')
+                resultados = cursor.fetchall()
 
-        if user:
-            # Autenticação bem-sucedida, atribuir um valor padrão ao id_nivel
-            user.id_nivel = user.id_nivel or 1  # Se for nulo, atribui o valor padrão 1
-            user.save()
-            print(f"Utilizador autenticado: {user.id_utilpgestao} - Nível {user.id_nivel}")
+                for resultado in resultados:
+                    funcionario = {
+                        'ID_FUNCIONARIO': resultado[0],
+                        'NOME': resultado[1],
+                        'DATANASC': resultado[2],
+                        'NIF': resultado[3],
+                        'EMAIL': resultado[4],
+                        'CONTACTO': resultado[5],
+                        'MORADA': resultado[6],
+                        'CARGO': resultado[7],
+                    }
+                    funcionarios.append(funcionario)
 
-            # Armazenar id_nivel na sessão usando LocalStorage
-            LocalStorage.set_id_nivel(request, user.id_nivel)
+            except Exception as e:
+                print(f"Exception type: {type(e)}")
+                print(f"Exception message: {str(e)}")
+                funcionarios = []
 
-            return redirect('homepage')
+        # Step 2: Check if the email exists in the funcionarios list
+        funcionario = next((f for f in funcionarios if f['EMAIL'] == email), None)
+
+        if funcionario:
+            # Step 3: Use id_funcionario to check the acesso_pgestao table
+            user = acesso_pgestao.objects.filter(
+                id_utilpgestao=funcionario['ID_FUNCIONARIO'],  # Corrected to use id_utilpgestao
+                password_pgestao=password
+            ).first()  # Assuming acesso_pgestao is the model for acesso_pgestao
+
+            if user:
+                # Authentication successful
+                print(f"Utilizador autenticado: {user.id_utilpgestao} - Nível {user.id_nivel}")
+
+                # Store id_nivel and name in session
+                LocalStorage.set_id_nivel(request, user.id_nivel)
+                request.session['user_name'] = funcionario['NOME']  # Store the user's name in the session
+                print(f"User name stored in session: {request.session['user_name']}")  # Debugging line
+
+                return redirect('homepage')
+            else:
+                messages.add_message(request, messages.ERROR, 'Credenciais inválidas. Tente novamente.')
         else:
-            messages.add_message(request, messages.ERROR, 'Credenciais inválidas. Tente novamente.')
+            messages.add_message(request, messages.ERROR, 'Email não encontrado. Tente novamente.')
 
     return render(request, 'index.html')
 #---------------------------------------------------------------------------------------------------------------------
