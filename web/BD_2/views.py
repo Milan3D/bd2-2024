@@ -2276,7 +2276,6 @@ def comprar(request, nome_equip, preco_equip, total_equip):
         messages.error(request, f'Erro ao fazer a compra: {str(e)}')
         return HttpResponse(f'Erro: {str(e)}')
     
-    
 
 def purchase_history(request):
     username = request.session.get('username')
