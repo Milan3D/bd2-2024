@@ -2202,21 +2202,18 @@ def criar_conta(request):
 
 def homepage_site_vendas(request):
     try:
-        # Recupera todos os equipamentos
-        equipments = Equipment.objects.using('mongodb').all()
-        
-        # Verifica se foram encontrados equipamentos
-        if not equipments:
-            raise Equipment.DoesNotExist
-        
-        print(f"Equipamentos encontrados: {equipments}")
-        
-    except Equipment.DoesNotExist:
-        return HttpResponse('Erro: Não foram encontrados equipamentos.')
+        equipments = Equipment.objects.all()  # Ensure this retrieves the correct data
+        logger.debug(f'Number of equipments found: {equipments.count()}')
     except Exception as e:
-        return HttpResponse(f'Erro: {str(e)}')
-    
-    return render(request, 'homepage_site_vendas.html', {'equipments': equipments})
+        logger.error(f'Error retrieving equipments: {e}')
+        equipments = []  # Set to an empty list to avoid further errors
+
+    context = {
+        'equipments': equipments,
+        'message': None,  # or any message you want to pass
+        'message_tags': None,  # or any tags you want to pass
+    }
+    return render(request, 'homepage_site_vendas.html', context)
 
 def comprar(request, nome_equip, preco_equip, total_equip):
     try:
