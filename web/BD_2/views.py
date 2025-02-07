@@ -2285,3 +2285,55 @@ def purchase_history(request):
     else:
         return HttpResponse('Usuário não autenticado.')
     
+def admin_dashboard(request):
+    # Ensure the user is authenticated and has the right permissions
+    id_nivel = LocalStorage.get_id_nivel(request)
+    if id_nivel != 1:  # Assuming 1 is the admin level
+        return redirect('index')
+
+    # Fetch stock equipment, components, and orders
+    with connection.cursor() as cursor:
+        cursor.execute('SELECT COUNT(*) FROM STOCKEQUIPAMENTOS')
+        stock_equipamentos_count = cursor.fetchone()[0]
+
+        cursor.execute('SELECT COUNT(*) FROM STOCKCOMPONENTES')
+        stock_componentes_count = cursor.fetchone()[0]
+
+        cursor.execute('SELECT COUNT(*) FROM ENCOMENDAS')
+        encomendas_count = cursor.fetchone()[0]
+
+        # Fetch total sales from invoices
+        cursor.execute('SELECT SUM(PRECO_FATURA) FROM FATURA')
+        total_vendas = cursor.fetchone()[0] or 0
+
+        # Fetch daily production data
+        cursor.execute('SELECT COUNT(*) FROM PRODUCAO_DIARIA WHERE DATA_PRODUCAO = CURRENT_DATE')
+        producao_diaria_count = cursor.fetchone()[0]
+
+        # Fetch list of fornecedores, maodeobra, funcionarios, and lotes
+        cursor.execute('SELECT * FROM FORNECEDORES')
+        fornecedores = cursor.fetchall()
+
+        cursor.execute('SELECT * FROM MAODEOBRA')
+        maodebra = cursor.fetchall()
+
+        cursor.execute('SELECT * FROM FUNCIONARIOS')
+        funcionarios = cursor.fetchall()
+
+        cursor.execute('SELECT * FROM LOTES')
+        lotes = cursor.fetchall()
+
+    context = {
+        'stock_equipamentos_count': stock_equipamentos_count,
+        'stock_componentes_count': stock_componentes_count,
+        'encomendas_count': encomendas_count,
+        'total_vendas': total_vendas,
+        'producao_diaria_count': producao_diaria_count,
+        'fornecedores': fornecedores,
+        'maodebra': maodebra,
+        'funcionarios': funcionarios,
+        'lotes': lotes,
+    }
+
+    return render(request, 'dashboard.html', context)
+    

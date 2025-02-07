@@ -113,4 +113,5 @@ urlpatterns = [
 
     path('excluir_equipamento/<int:id>/', views.excluir_equipamento, name='excluir_equipamento'),
 
+    path('dashboard/', views.admin_dashboard, name='dashboard'),
 ]
