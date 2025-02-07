@@ -5,74 +5,217 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            position: fixed;
+            height: 100%;
+            padding-top: 20px;
+        }
+        .sidebar a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            flex: 1;
+        }
         .card {
             margin-bottom: 20px;
+        }
+        .table-responsive {
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="{% url 'stock' %}"><i class="fas fa-box"></i> Stock</a>
+        <a href="{% url 'orders' %}"><i class="fas fa-shopping-cart"></i> Orders</a>
+        <a href="{% url 'suppliers' %}"><i class="fas fa-truck"></i> Suppliers</a>
+        <a href="{% url 'workforce' %}"><i class="fas fa-users"></i> Workforce</a>
+        <a href="{% url 'employees' %}"><i class="fas fa-user-friends"></i> Employees</a>
+        <a href="{% url 'batches' %}"><i class="fas fa-th"></i> Batches</a>
+        <a href="{% url 'settings' %}"><i class="fas fa-cog"></i> Settings</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
         <h1 class="mt-4">Admin Dashboard</h1>
 
+        <!-- Summary Cards -->
         <div class="row">
             <div class="col-md-4">
-                <div class="card">
+                <div class="card text-white bg-primary">
                     <div class="card-body">
                         <h5 class="card-title">Stock Equipamentos</h5>
                         <p class="card-text">{{ stock_equipamentos_count }}</p>
+                        <p class="card-text"><small>Change: +5%</small></p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card">
+                <div class="card text-white bg-success">
                     <div class="card-body">
                         <h5 class="card-title">Stock Componentes</h5>
                         <p class="card-text">{{ stock_componentes_count }}</p>
+                        <p class="card-text"><small>Change: -2%</small></p>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card">
+                <div class="card text-white bg-warning">
                     <div class="card-body">
                         <h5 class="card-title">Encomendas</h5>
                         <p class="card-text">{{ encomendas_count }}</p>
+                        <p class="card-text"><small>Change: +10%</small></p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <canvas id="vendasChart" width="400" height="200"></canvas>
-        <canvas id="producaoChart" width="400" height="200"></canvas>
+        <!-- Graphs Section -->
+        <div class="row">
+            <div class="col-md-6">
+                <canvas id="vendasChart" width="400" height="200"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="producaoChart" width="400" height="200"></canvas>
+            </div>
+        </div>
 
+        <!-- Interactive Lists Section -->
         <h2 class="mt-4">Fornecedores</h2>
-        <ul>
-            {% for fornecedor in fornecedores %}
-                <li>{{ fornecedor }}</li>
-            {% endfor %}
-        </ul>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fornecedor in fornecedores %}
+                        <tr>
+                            <td>{{ fornecedor.0 }}</td>
+                            <td>{{ fornecedor.1 }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm">View</button>
+                                <button class="btn btn-warning btn-sm">Edit</button>
+                                <button class="btn btn-danger btn-sm">Delete</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <h2 class="mt-4">Mão de Obra</h2>
-        <ul>
-            {% for item in maodebra %}
-                <li>{{ item }}</li>
-            {% endfor %}
-        </ul>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Cost</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in maodebra %}
+                        <tr>
+                            <td>{{ item.0 }}</td>
+                            <td>{{ item.1 }}</td>
+                            <td>{{ item.2 }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm">View</button>
+                                <button class="btn btn-warning btn-sm">Edit</button>
+                                <button class="btn btn-danger btn-sm">Delete</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <h2 class="mt-4">Funcionários</h2>
-        <ul>
-            {% for funcionario in funcionarios %}
-                <li>{{ funcionario }}</li>
-            {% endfor %}
-        </ul>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for funcionario in funcionarios %}
+                        <tr>
+                            <td>{{ funcionario.0 }}</td>
+                            <td>{{ funcionario.1 }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm">View</button>
+                                <button class="btn btn-warning btn-sm">Edit</button>
+                                <button class="btn btn-danger btn-sm">Delete</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <h2 class="mt-4">Lotes</h2>
-        <ul>
-            {% for lote in lotes %}
-                <li>{{ lote }}</li>
-            {% endfor %}
-        </ul>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>D Lote</th>
+                        <th>ID Produção</th>
+                        <th>ID TipoEquip</th>
+                        <th>Quantidade Produtos</th>
+                        <th>ID Armazém</th>
+                        <th>ID Funcionário</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lote in lotes %}
+                        <tr>
+                            <td>{{ lote.0 }}</td>
+                            <td>{{ lote.1 }}</td>
+                            <td>{{ lote.2 }}</td>
+                            <td>{{ lote.3 }}</td>
+                            <td>{{ lote.4 }}</td>
+                            <td>{{ lote.5 }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm">View</button>
+                                <button class="btn btn-warning btn-sm">Edit</button>
+                                <button class="btn btn-danger btn-sm">Delete</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>

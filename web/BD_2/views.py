@@ -2285,7 +2285,7 @@ def purchase_history(request):
     else:
         return HttpResponse('Usuário não autenticado.')
     
-def admin_dashboard(request):
+def dashboard(request):
     # Ensure the user is authenticated and has the right permissions
     id_nivel = LocalStorage.get_id_nivel(request)
     if id_nivel != 1:  # Assuming 1 is the admin level
@@ -2293,12 +2293,15 @@ def admin_dashboard(request):
 
     # Fetch stock equipment, components, and orders
     with connection.cursor() as cursor:
+        # Total stock equipment
         cursor.execute('SELECT COUNT(*) FROM STOCKEQUIPAMENTOS')
         stock_equipamentos_count = cursor.fetchone()[0]
 
+        # Total stock components
         cursor.execute('SELECT COUNT(*) FROM STOCKCOMPONENTES')
         stock_componentes_count = cursor.fetchone()[0]
 
+        # Total orders
         cursor.execute('SELECT COUNT(*) FROM ENCOMENDAS')
         encomendas_count = cursor.fetchone()[0]
 
@@ -2310,17 +2313,17 @@ def admin_dashboard(request):
         cursor.execute('SELECT COUNT(*) FROM PRODUCAO_DIARIA WHERE DATA_PRODUCAO = CURRENT_DATE')
         producao_diaria_count = cursor.fetchone()[0]
 
-        # Fetch list of fornecedores, maodeobra, funcionarios, and lotes
-        cursor.execute('SELECT * FROM FORNECEDORES')
+        # Fetch limited list of fornecedores, maodebra, funcionarios, and lotes
+        cursor.execute('SELECT ID_FORNECEDOR, NOME_FORNECEDOR FROM FORNECEDORES LIMIT 10')
         fornecedores = cursor.fetchall()
 
-        cursor.execute('SELECT * FROM MAODEOBRA')
+        cursor.execute('SELECT ID_MO, NOME_MO, CUSTO_MO FROM MAODEOBRA LIMIT 10')
         maodebra = cursor.fetchall()
 
-        cursor.execute('SELECT * FROM FUNCIONARIOS')
+        cursor.execute('SELECT ID_FUNCIONARIO, NOME FROM FUNCIONARIOS LIMIT 10')
         funcionarios = cursor.fetchall()
 
-        cursor.execute('SELECT * FROM LOTES')
+        cursor.execute('SELECT ID_LOTE, ID_PRODUCAO, ID_TIPOEQUIP, QUANTIDADE_PRODUTOS, ID_ARMAZEM, ID_FUNCIONARIO FROM LOTES LIMIT 10')
         lotes = cursor.fetchall()
 
     context = {
