@@ -2336,4 +2336,8 @@ def dashboard(request):
     }
 
     return render(request, 'dashboard.html', context)
-    
+
+def armazens_view(request):
+    armazens = Armazem.objects.all()  # Fetch the list of armazéns
+    funcionarios = Funcionario.objects.all()  # Fetch the list of funcionários
+    return render(request, 'armazens.html', {'armazens': armazens, 'funcionarios': funcionarios})
