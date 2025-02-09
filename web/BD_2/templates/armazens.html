@@ -25,7 +25,6 @@
         <table class="table" id="armazensTable">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Nome</th>
                     <th>Morada</th>
                     <th>Email</th>
@@ -39,19 +38,19 @@
             <tbody>
                 {% for armazem in armazens %}
                 <tr>
-                    <td style="display:none;">{{ armazem.ID_ARMAZEM }}</td>
                     <td>{{ armazem.NOME_ARMAZEM }}</td>
                     <td>{{ armazem.MORADA_ARMAZEM }}</td>
                     <td>{{ armazem.EMAIL_ARMAZEM }}</td>
                     <td>{{ armazem.CONTACTO_ARMAZEM }}</td>
-                    <td>{{ armazem.funcionario_nome }}</td>
+                    <td>{{ armazem.NOME_FUNCIONARIO }}</td>
                     {% if tem_permissao %}
                     <td>
                         <button type="button" class="btn btn-danger btn-sm" data-toggle="modal"
                             data-target="#deleteArmazemModal"
                             onclick="excluirArmazem({{ armazem.ID_ARMAZEM }})">Excluir</button>
                         <button type="button" class="btn btn-warning btn-sm" data-toggle="modal"
-                            data-target="#editArmazemModal" data-id-armazem="{{ armazem.ID_ARMAZEM }}"
+                            data-target="#editArmazemModal"
+                            data-id-armazem="{{ armazem.ID_ARMAZEM }}"
                             data-nome-armazem="{{ armazem.NOME_ARMAZEM }}"
                             data-morada-armazem="{{ armazem.MORADA_ARMAZEM }}"
                             data-email-armazem="{{ armazem.EMAIL_ARMAZEM }}"
@@ -78,34 +77,46 @@
     </div>
 
     <!-- Modal to Edit Armazem -->
-   <!-- Modal to Edit Armazem -->
-<div class="modal fade" id="editArmazemModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar Armazém</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="edit_ID_Funcionario">Funcionário</label>
-                    <select class="form-control" id="edit_ID_Funcionario" name="edit_ID_Funcionario">
-                        {% for funcionario in funcionarios %}
-                        <option value="{{ funcionario.id }}">{{ funcionario.nome }}</option>
-                        {% endfor %}
-                    </select>
+    <div class="modal fade" id="editArmazemModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Armazém</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <!-- Other form fields for editing -->
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_Nome_Armazem">Nome do Armazém</label>
+                        <input type="text" class="form-control" id="edit_Nome_Armazem" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Morada_Armazem">Morada do Armazém</label>
+                        <input type="text" class="form-control" id="edit_Morada_Armazem" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Email_Armazem">Email do Armazém</label>
+                        <input type="email" class="form-control" id="edit_Email_Armazem" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_Contacto_Armazem">Contacto do Armazém</label>
+                        <input type="text" class="form-control" id="edit_Contacto_Armazem" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_ID_Funcionario">Funcionário</label>
+                        <select class="form-control" id="edit_ID_Funcionario" name="edit_ID_Funcionario">
+                            {% for funcionario in funcionarios %}
+                            <option value="{{ funcionario.ID_FUNCIONARIO }}">{{ funcionario.NOME }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoArmazem()">Guardar</button>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" onclick="enviarDadosEdicaoArmazem()">Guardar</button>
-            </div>
-        </div>
-    </div>
-</div>
         </div>
     </div>
 
@@ -195,7 +206,6 @@
             var idFuncionario = button.data('id-funcionario');
 
             var modal = $(this);
-            modal.find('.modal-body #edit_Id_Armazem').val(idArmazem);
             modal.find('.modal-body #edit_Nome_Armazem').val(nomeArmazem);
             modal.find('.modal-body #edit_Morada_Armazem').val(moradaArmazem);
             modal.find('.modal-body #edit_Email_Armazem').val(emailArmazem);
@@ -204,7 +214,7 @@
         });
 
         function enviarDadosEdicaoArmazem() {
-            var idArmazem = $('#edit_Id_Armazem').val();
+            var idArmazem = $('#edit_Nome_Armazem').val();
             var nomeArmazem = $('#edit_Nome_Armazem').val();
             var moradaArmazem = $('#edit_Morada_Armazem').val();
             var emailArmazem = $('#edit_Email_Armazem').val();
