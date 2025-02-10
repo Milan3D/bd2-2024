@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List Equipments</title>
+    <title>Homepage</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -32,16 +32,16 @@
         <a href="{% url 'purchase_history' %}" class="btn btn-primary mb-4">Histórico de Compras</a>
 
         <div class="row">
-            {% if equipments %}
-                {% for equipment in equipments %}
+            {% if equipamentos %}
+                {% for equipamento in equipamentos %}
                 <div class="col-md-4 mb-4">
                     <div class="card">
-                        <img src="{{ equipment.foto_url }}" class="card-img-top"
-                            alt="{{ equipment.nome_equip_pgsidcampo }}">
+                        <img src="{{ equipamento.foto_url }}" class="card-img-top"
+                            alt="{{ equipamento.nome_equip_pgsidcampo }}">
                         <div class="card-body">
-                            <h5 class="card-title">{{ equipment.nome_equip_pgsidcampo }}</h5>
-                            <p class="card-text">{{ equipment.desc_equip_pgsidcampo }}</p>
-                            <p class="card-text"><strong>Price:</strong> ${{ equipment.custo_equip_pgsidcampo }}</p>
+                            <h5 class="card-title">{{ equipamento.nome_equip_pgsidcampo }}</h5>
+                            <p class="card-text">{{ equipamento.desc_equip_pgsidcampo }}</p>
+                            <p class="card-text"><strong>Price:</strong> ${{ equipamento.custo_equip_pgsidcampo }}</p>
                             <!-- Botão Comprar -->
                             <button type="button" class="btn btn-primary" data-toggle="modal"
                                 data-target="#confirmModal{{ forloop.counter }}">Comprar</button>
@@ -58,13 +58,13 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            Tem certeza que deseja comprar "{{ equipment.nome_equip_pgsidcampo }}"?
+                                            Tem certeza que deseja comprar "{{ equipamento.nome_equip_pgsidcampo }}"?
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-dismiss="modal">Cancelar</button>
                                             <form method="post"
-                                                action="{% url 'comprar' equipment.nome_equip_pgsidcampo equipment.custo_equip_pgsidcampo equipment.custo_equip_pgsidcampo %}">
+                                                action="{% url 'comprar' equipamento.nome_equip_pgsidcampo equipamento.custo_equip_pgsidcampo equipamento.custo_equip_pgsidcampo %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                             </form>
