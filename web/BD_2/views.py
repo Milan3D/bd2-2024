@@ -2136,46 +2136,34 @@ def detalhes_encomenda (request, id):
     }
     return render(request, 'detalhes_encomenda.html', exemplo_encomenda)
 
-
 def login_site_vendas(request):
     if request.method == 'POST':
-        email = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
-        
-        print(f"\nLogin attempt with email: {email}")
-        
+
+        print(f"Attempting to log in with email: {email}")
+        print(f"Password entered: {password}")  # Be cautious with logging passwords in production
+
         try:
-            with connection.cursor() as cursor:
-                # Main login query
-                cursor.execute("""
-                    SELECT f.id_funcionario, f.nome, f.email, a.password_pgestao, a.id_nivel
-                    FROM funcionarios f
-                    INNER JOIN acesso_pgestao a ON f.id_funcionario = a.id_funcionario
-                    WHERE f.email = %s AND a.password_pgestao = %s
-                """, [email, password])
-                
-                user = cursor.fetchone()
-                print(f"Query result: {user}")
-                
-                if user:
-                    # Store minimal information in the request
-                    request.id_funcionario = user[0]
-                    request.nome = user[1]
-                    request.id_nivel = user[4]
-                    
-                    # Redirect to homepage on successful login
-                    return redirect('homepage_site_vendas')
-                else:
-                    messages.error(request, 'Invalid email or password')
-                    return render(request, 'login_site_vendas.html')
-                
-        except Exception as e:
-            print(f"\nLogin error: {str(e)}")
-            print(f"Full error traceback:", traceback.format_exc())
-            messages.error(request, 'An error occurred during login. Please try again.')
-            return render(request, 'login_site_vendas.html')
-            
-    return render(request, 'login_site_vendas.html')
+            # Retrieve the user from the database using email
+            user = User.objects.using('mongodb').get(email=email)
+            print(f"User found: {user.username}")
+
+            # Directly compare the password
+            if password == user.password:  # Compare directly with the stored password
+                print(f"Password for user {user.username} is correct.")
+                request.session['username'] = user.username
+                return redirect('homepage_site_vendas')
+            else:
+                print(f"Incorrect password for user with email {email}.")
+                return HttpResponse('Usuário ou senha incorretos.')
+        except User.DoesNotExist:
+            print(f"User with email {email} does not exist.")
+            return HttpResponse('Usuário ou senha incorretos.')
+    else:
+        print("GET request received for login.")
+        return render(request, 'login_site_vendas.html')  
+
 
 def criar_conta(request):
     if request.method == 'POST':
