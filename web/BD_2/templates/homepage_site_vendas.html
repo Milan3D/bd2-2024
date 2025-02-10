@@ -32,23 +32,19 @@
         <a href="{% url 'purchase_history' %}" class="btn btn-primary mb-4">Histórico de Compras</a>
 
         <div class="row">
-            {% if equipamentos %}
-                {% for equipamento in equipamentos %}
+            {% if equipmentos %}
+                {% for equipamento in equipmentos %}
                 <div class="col-md-4 mb-4">
                     <div class="card">
-                        <img src="{{ equipamento.foto_url }}" class="card-img-top"
-                            alt="{{ equipamento.nome_equip_pgsidcampo }}">
+                        <img src="{{ equipamento.foto_url }}" class="card-img-top" alt="{{ equipamento.nome_equip }}">
                         <div class="card-body">
-                            <h5 class="card-title">{{ equipamento.nome_equip_pgsidcampo }}</h5>
-                            <p class="card-text">{{ equipamento.desc_equip_pgsidcampo }}</p>
-                            <p class="card-text"><strong>Price:</strong> ${{ equipamento.custo_equip_pgsidcampo }}</p>
-                            <!-- Botão Comprar -->
-                            <button type="button" class="btn btn-primary" data-toggle="modal"
-                                data-target="#confirmModal{{ forloop.counter }}">Comprar</button>
-
+                            <h5 class="card-title">{{ equipamento.nome_equip }}</h5>
+                            <p class="card-text">{{ equipamento.desc_equip }}</p>
+                            <p class="card-text"><strong>Price:</strong> ${{ equipamento.custo_equip }}</p>
+                            <p class="card-text"><strong>Available Quantity:</strong> {{ equipamento.quantidade_stock }}</p>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirmModal{{ forloop.counter }}">Comprar</button>
                             <!-- Modal de Confirmação -->
-                            <div class="modal fade" id="confirmModal{{ forloop.counter }}" tabindex="-1" role="dialog"
-                                aria-labelledby="confirmModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="confirmModal{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
@@ -58,13 +54,11 @@
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            Tem certeza que deseja comprar "{{ equipamento.nome_equip_pgsidcampo }}"?
+                                            Tem certeza que deseja comprar "{{ equipamento.nome_equip }}"?
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-dismiss="modal">Cancelar</button>
-                                            <form method="post"
-                                                action="{% url 'comprar' equipamento.nome_equip_pgsidcampo equipamento.custo_equip_pgsidcampo equipamento.custo_equip_pgsidcampo %}">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                            <form method="post" action="{% url 'comprar' equipamento.id_equip equipamento.custo_equip %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary">Confirmar</button>
                                             </form>
