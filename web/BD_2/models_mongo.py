@@ -1,7 +1,7 @@
 from djongo import models
 
 class User(models.Model):
-    _id = models.ObjectIdField()
+    #_id = models.ObjectIdField()
     username = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=100)
     email = models.EmailField()

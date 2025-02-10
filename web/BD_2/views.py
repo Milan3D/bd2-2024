@@ -2329,3 +2329,15 @@ def armazens_view(request):
     armazens = Armazem.objects.all()  # Fetch the list of armazéns
     funcionarios = Funcionario.objects.all()  # Fetch the list of funcionários
     return render(request, 'armazens.html', {'armazens': armazens, 'funcionarios': funcionarios})
+
+def load_equipamentos_client(request):
+    try:
+        # Retrieve all equipamentos from the database
+        equipamentos = Equipamentos.objects.all()
+        print(f"Retrieved {len(equipamentos)} equipamentos for client view.")
+    except Exception as e:
+        print(f"Error retrieving equipamentos: {str(e)}")
+        equipamentos = []
+
+    # Render the equipamentos in a client-side template
+    return render(request, 'equipamentos_client.html', {'equipamentos': equipamentos})

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'BD_2',
 ]
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
