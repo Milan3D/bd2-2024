@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from BD_2 import views
+from .views import logout_view
 
 urlpatterns = [
     path('', view=views.index, name='index'),
@@ -114,4 +115,6 @@ urlpatterns = [
     path('excluir_equipamento/<int:id>/', views.excluir_equipamento, name='excluir_equipamento'),
 
     path('dashboard/', views.dashboard, name='dashboard'),
+
+    path('logout/', logout_view, name='logout'),
 ]

@@ -21,7 +21,8 @@ from .models_mongo import User
 from .models_mongo import Equipment
 from .models_mongo import Purchase
 from django.conf import settings
-
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 
 logger = logging.getLogger(__name__)
@@ -2192,6 +2193,7 @@ def homepage_site_vendas(request):
         return redirect('login_site_vendas')  # Redirect to login if not authenticated
 
     try:
+
         # Fetch all equipment items from PostgreSQL
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM public.fn_equipamentos_list()')
@@ -2210,13 +2212,9 @@ def homepage_site_vendas(request):
                 for resultado in resultados
             ]
 
-            # Debugging: Print the retrieved equipamentos
-            print(f"Retrieved equipamentos: {equipamentos}")
-
         context = {
             'equipamentos': equipamentos,
-            'message': None,
-            'message_tags': None,
+            'user_name': request.session.get('user_name', 'Guest'),  # Default to 'Guest' if not found
         }
     except Exception as e:
         logger.error(f'Error retrieving equipment items: {e}')
@@ -2367,3 +2365,7 @@ def load_equipamentos_client(request):
 
     # Render the equipamentos in a client-side template
     return render(request, 'equipamentos_client.html', {'equipamentos': equipamentos})
+
+def logout_view(request):
+    logout(request)  # This will log the user out
+    return redirect('login_site_vendas')  # Redirect to the login page after logout
