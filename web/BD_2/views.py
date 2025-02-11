@@ -16,7 +16,6 @@ from django.contrib import messages
 from .utils import LocalStorage
 from datetime import datetime
 from django.utils import timezone
-from .models import EquipmentItem, EquipmentStock
 
 from .models_mongo import User
 from .models_mongo import Equipment
@@ -2188,35 +2187,41 @@ def criar_conta(request):
         return render(request, 'criar_conta.html')
     
 def homepage_site_vendas(request):
+    # Ensure the user is authenticated
+    if 'username' not in request.session:
+        return redirect('login_site_vendas')  # Redirect to login if not authenticated
+
     try:
-        # Fetch all equipment items and their stock
-        equipment_items = EquipmentItem.objects.all()
-        logger.debug(f'Fetched equipment items: {equipment_items}')  # Log fetched items
-        stock_data = EquipmentStock.objects.all()
-        logger.debug(f'Fetched stock data: {stock_data}')  # Log fetched stock data
+        # Fetch all equipment items from PostgreSQL
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT * FROM public.fn_equipamentos_list()')
+            resultados = cursor.fetchall()
 
-        # Create a dictionary to hold the stock quantities for each equipment item
-        stock_dict = {stock.id_equip.id_equip: stock.quantidade_stockequip for stock in stock_data}
-
-        # Prepare the context with stock information
-        context = {
-            'equipmentos': [
+            # Prepare the context with equipment information
+            equipamentos = [
                 {
-                    'id_equip': item.id_equip,
-                    'nome_equip': item.nome_equip,
-                    'desc_equip': item.desc_equip,
-                    'custo_equip': item.custo_equip,
-                    'quantidade_stock': stock_dict.get(item.id_equip, 0)  # Default to 0 if not found
+                    'id_equip': resultado[0],
+                    'nome_equip': resultado[1],
+                    'desc_equip': resultado[2],
+                    'custo_equip': resultado[3],
+                    'quantidade_stock': resultado[4],
+                    'foto_url': resultado[5],  # Assuming there's a photo URL in the result
                 }
-                for item in equipment_items
-            ],
+                for resultado in resultados
+            ]
+
+            # Debugging: Print the retrieved equipamentos
+            print(f"Retrieved equipamentos: {equipamentos}")
+
+        context = {
+            'equipamentos': equipamentos,
             'message': None,
             'message_tags': None,
         }
     except Exception as e:
         logger.error(f'Error retrieving equipment items: {e}')
         context = {
-            'equipmentos': [],
+            'equipamentos': [],
             'message': 'Erro ao carregar equipamentos.',
             'message_tags': 'danger',
         }
