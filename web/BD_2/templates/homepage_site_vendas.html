@@ -93,19 +93,18 @@
             {% for equipamento in equipamentos %}
             <div class="col-md-4 mb-4">
                 <div class="product-card">
-                    <div class="product-image">🛠️</div> <!-- Generic emoji as image -->
-                    <h5 class="card-title">{{ equipamento.nome_equip }}</h5>
-                    <p class="card-text"><strong>Price:</strong> ${{ equipamento.custo_equip }}</p>
+                    <div class="product-image">🛠️</div> 
+                    <h5 class="card-title">{{ equipamento.nome_equip }}</h5> <!-- Ensure this is the name -->
+                    <p class="card-text"><strong>Price:</strong> ${{ equipamento.custo_equip }}</p> <!-- Ensure this is the price -->
                     <button class="btn btn-primary" onclick="addToCart('{{ equipamento.nome_equip|escapejs }}', {{ equipamento.custo_equip }})">Comprar</button>
                 </div>
             </div>
             {% endfor %}
         </div>
+                
     </div>
 
     <script>
-      let cart = [];
-
 function addToCart(nome, preco) {
     console.log(`Adding to cart: ${nome}, Price: $${preco}`); // Debugging line
     
@@ -123,6 +122,7 @@ function addToCart(nome, preco) {
     // Automatically show the cart when an item is added
     document.getElementById('cart').style.display = 'block';
 }
+
 
 function updateCartDisplay() {
     const cartItems = document.getElementById('cart-items');
