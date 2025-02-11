@@ -72,11 +72,9 @@
             <div class="col-md-4 mb-4">
                 <div class="product-card border p-3 text-center">
                     <div class="product-image">🛠️</div>
-                    <!-- <h5>{{ equipamento.nome_equip }}</h5> -->
-                    <h5> {{ equipamento.custo_equip }}</h5>
+                    <h5>{{ equipamento.custo_equip }}</h5>
                     <p><strong>Preço:</strong> ${{ equipamento.foto_url }}</p>
-
-                    <button class="btn btn-primary" onclick="addToCart('{{ equipamento.nome_equip|escapejs }}', {{ equipamento.custo_equip }})">
+                    <button class="btn btn-primary" onclick="addToCart('{{ equipamento.custo_equip|escapejs }}', {{ equipamento.foto_url }})">
                         Comprar
                     </button>
                 </div>
@@ -89,6 +87,13 @@
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
         function addToCart(nome, preco) {
+            // Ensure price is a valid number
+            preco = parseFloat(preco);
+            if (isNaN(preco)) {
+                console.error('Invalid price:', preco);
+                return;
+            }
+
             const existingItem = cart.find(item => item.nome === nome);
             if (existingItem) {
                 existingItem.quantity += 1;
