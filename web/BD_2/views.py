@@ -23,7 +23,7 @@ from .models_mongo import Purchase
 from django.conf import settings
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -2322,9 +2322,15 @@ def dashboard(request):
         cursor.execute('SELECT SUM(PRECO_FATURA) FROM FATURA')
         total_vendas = cursor.fetchone()[0] or 0
 
-        # Fetch daily production data
-        cursor.execute('SELECT COUNT(*) FROM PRODUCAO_DIARIA WHERE DATA_PRODUCAO = CURRENT_DATE')
-        producao_diaria_count = cursor.fetchone()[0]
+        # Fetch daily production data from vista_produtos_enviados_diario
+        cursor.execute('SELECT data_guiasvendas, total_produtos_enviados FROM vista_produtos_enviados_diario')
+        producao_diaria = cursor.fetchall()
+        producao_diaria_labels = [record[0].strftime('%Y-%m-%d') for record in producao_diaria]  # Convert date to string
+        producao_diaria_data = [record[1] for record in producao_diaria]    # Extract totals
+
+        # Fetch total production data from vista_produtos_enviados_total
+        cursor.execute('SELECT COUNT(*) FROM vista_produtos_enviados_total')  # Adjust as needed
+        producao_total_count = cursor.fetchone()[0]  # This could be a count or any other relevant metric
 
         # Fetch limited list of fornecedores, maodebra, funcionarios, and lotes
         cursor.execute('SELECT ID_FORNECEDOR, NOME_FORNECEDOR FROM FORNECEDORES LIMIT 10')
@@ -2344,7 +2350,9 @@ def dashboard(request):
         'stock_componentes_count': stock_componentes_count,
         'encomendas_count': encomendas_count,
         'total_vendas': total_vendas,
-        'producao_diaria_count': producao_diaria_count,
+        'producao_diaria_labels': json.dumps(producao_diaria_labels),  # Pass labels to the template
+        'producao_diaria_data': json.dumps(producao_diaria_data),      # Pass data to the template
+        'producao_total_count': producao_total_count,                  # Pass total production count
         'fornecedores': fornecedores,
         'maodebra': maodebra,
         'funcionarios': funcionarios,
@@ -2373,3 +2381,4 @@ def load_equipamentos_client(request):
 def logout_view(request):
     logout(request)  # This will log the user out
     return redirect('login_site_vendas')  # Redirect to the login page after logout
+
