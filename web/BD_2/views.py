@@ -2177,7 +2177,11 @@ def criar_conta(request):
         data_nascimento = request.POST.get('data_nascimento')
         morada = request.POST.get('morada')
 
-        # Consulta no banco de dados MongoDB
+        # Step 1: Check if the email already exists
+        if User.objects.using('mongodb').filter(email=email).exists():
+            return HttpResponse('Este email já está em uso. Por favor, escolha outro.')
+
+        # Step 2: Create the user if the email is unique
         try:
             user = User.objects.using('mongodb').create(username=username, password=password, email=email, nome=nome, nif=nif, telemovel=telemovel, data_nascimento=data_nascimento, morada=morada)
             print(f"Usuário criado: {user.username}")
