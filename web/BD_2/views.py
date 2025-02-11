@@ -2200,21 +2200,22 @@ def homepage_site_vendas(request):
         return redirect('login_site_vendas')  # Redirect to login if not authenticated
 
     try:
-
         # Fetch all equipment items from PostgreSQL
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM public.fn_equipamentos_list()')
             resultados = cursor.fetchall()
 
-            # Prepare the context with equipment information
+            print("Debug: Query results:", resultados)  # DEBUG LINE
+
+            # Ensure the correct mapping of fields
             equipamentos = [
                 {
                     'id_equip': resultado[0],
-                    'nome_equip': resultado[1],
-                    'desc_equip': resultado[2],
-                    'custo_equip': resultado[3],
-                    'quantidade_stock': resultado[4],
-                    'foto_url': resultado[5],  # Assuming there's a photo URL in the result
+                    'nome_equip': resultado[1] if resultado[1] else "Nome Indisponível",
+                    'desc_equip': resultado[2] if resultado[2] else "Sem descrição",
+                    'custo_equip': resultado[3] if resultado[3] is not None else 0.00,
+                    'quantidade_stock': resultado[4] if resultado[4] is not None else 0,
+                    'foto_url': resultado[5] if resultado[5] else '',  # Assuming there's a photo URL
                 }
                 for resultado in resultados
             ]
@@ -2232,6 +2233,7 @@ def homepage_site_vendas(request):
         }
 
     return render(request, 'homepage_site_vendas.html', context)
+
 
 
 def comprar(request, nome_equip, preco_equip, total_equip):

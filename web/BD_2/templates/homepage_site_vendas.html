@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,278 +8,151 @@
     <style>
         #cart {
             position: fixed;
-            top: 20px;
+            top: 80px;
             right: 20px;
             border: 1px solid #ccc;
-            padding: 10px;
+            padding: 15px;
             background-color: white;
             z-index: 1000;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 250px; /* Set a fixed width for the cart */
-            display: none; /* Initially hidden */
-            display: block !important;
-            opacity: 1 !important;
-            pointer-events: all !important;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 280px;
+            display: none;
         }
-        .product-card {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: transform 0.2s;
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
         }
-        .product-card:hover {
-            transform: scale(1.05);
-        }
-        .product-image {
-            font-size: 50px; /* Adjust size for emoji */
+        .close-cart {
+            cursor: pointer;
+            font-size: 20px;
         }
         .cart-item {
             display: flex;
             justify-content: space-between;
             padding: 5px 0;
-            border-bottom: 1px solid #eee; /* Add a separator between items */
+            border-bottom: 1px solid #eee;
         }
         .cart-item:last-child {
-            border-bottom: none; /* Remove border for the last item */
+            border-bottom: none;
         }
     </style>
 </head>
-
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">Cliente Site</a>
         <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <!-- Other nav items can go here -->
-            </ul>
+            <ul class="navbar-nav mr-auto"></ul>
             <span class="navbar-text">
-                {{ request.session.user_name }} <!-- Display logged-in user's name -->
-                <a href="{% url 'logout' %}" class="btn btn-danger btn-sm ml-2">Terminar Sessao</a> <!-- Logout button -->
-                <span class="ml-2" style="cursor: pointer;" onclick="toggleCart()">🛒</span> <!-- Cart emoji -->
+                {{ request.session.user_name }}
+                <a href="{% url 'logout' %}" class="btn btn-danger btn-sm ml-2">Terminar Sessão</a>
+                <span class="ml-2" style="cursor: pointer;" onclick="toggleCart()">🛒</span>
             </span>
         </div>
     </nav>
 
     <div id="cart">
-        <h5>Cart</h5>
-        <div id="cart-items"></div>
-        <button class="btn btn-success" onclick="checkout()">Buy</button>
-    </div>
-
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">
-            {{ message }}
+        <div class="cart-header">
+            <span>Carrinho</span>
+            <span class="close-cart" onclick="hideCart()">&times;</span>
         </div>
-        {% endfor %}
+        <div id="cart-items"></div>
+        <button class="btn btn-success w-100 mt-2" onclick="checkout()">Finalizar Compra</button>
     </div>
-    {% endif %}
 
     <div class="container mt-5">
-        <h1 class="mb-4">Equipamentos para venda</h1>
-
-        <!-- Mensagem de Sucesso ou Erro -->
-        {% if message %}
-        <div class="alert {% if message_tags %}alert-{{ message_tags }}{% endif %}" role="alert">
-            {{ message }}
-        </div>
-        {% endif %}
-
-        <a href="{% url 'purchase_history' %}" class="btn btn-primary mb-4">Histórico de Compras</a>
-
+        <h1 class="mb-4">Equipamentos para Venda</h1>
         <div class="row">
             {% for equipamento in equipamentos %}
             <div class="col-md-4 mb-4">
-                <div class="product-card">
+                <div class="product-card border p-3 text-center">
                     <div class="product-image">🛠️</div>
-                    <h5 class="card-title">{{ equipamento.nome_equip }}</h5>
-                    <p class="card-text"><strong>Price:</strong> ${{ equipamento.custo_equip }}</p>
-                    <button class="btn btn-primary" 
-                            onclick="addToCart('{{ equipamento.nome_equip|escapejs }}', {{ equipamento.custo_equip }})">
+                    <!-- <h5>{{ equipamento.nome_equip }}</h5> -->
+                    <h5> {{ equipamento.custo_equip }}</h5>
+                    <p><strong>Preço:</strong> ${{ equipamento.foto_url }}</p>
+
+                    <button class="btn btn-primary" onclick="addToCart('{{ equipamento.nome_equip|escapejs }}', {{ equipamento.custo_equip }})">
                         Comprar
                     </button>
                 </div>
             </div>
             {% endfor %}
         </div>
-            <!-- Add this modal near the end of the body before scripts -->
-<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="successModalLabel">Compra Feita com Sucesso</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Sua compra foi realizada com sucesso! Você pode visualizar seu histórico de compras na página de Histórico de Compras.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-            </div>
-        </div>
     </div>
-</div>
 
     <script>
-// Cart initialization with persistence
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-function addToCart(nome, preco) {
-    console.log('[DEBUG] Adding to cart:', nome, preco);
-    
-    // Validate inputs
-    if (typeof nome !== 'string' || nome.trim() === '') {
-        console.error('Invalid product name:', nome);
-        return;
-    }
-    
-    const numericPreco = Number(preco);
-    if (isNaN(numericPreco)) {
-        console.error('Invalid price value:', preco);
-        return;
-    }
-
-    // Normalize product name for comparison
-    const normalizedNome = nome.trim().toLowerCase();
-    
-    // Find existing item
-    const existingIndex = cart.findIndex(item => 
-        item.nome.trim().toLowerCase() === normalizedNome
-    );
-
-    if (existingIndex > -1) {
-        cart[existingIndex].quantity += 1;
-    } else {
-        cart.push({
-            nome: nome.trim(),
-            preco: numericPreco,
-            quantity: 1
-        });
-    }
-
-    // Persist to localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartDisplay();
-    showCart();
-}
-
-function updateCartDisplay() {
-    const cartItems = document.getElementById('cart-items');
-    if (!cartItems) {
-        console.error('Cart items container not found!');
-        return;
-    }
-
-    // Clear existing items
-    cartItems.innerHTML = '';
-
-    // Create new items
-    cart.forEach((item, index) => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'cart-item';
-        itemDiv.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    ${item.nome} 
-                    <br>
-                    <small>$${item.preco.toFixed(2)} x ${item.quantity}</small>
-                </div>
-                <button 
-                    class="btn btn-danger btn-sm" 
-                    onclick="removeFromCart(${index})"
-                >
-                    X
-                </button>
-            </div>
-        `;
-        cartItems.appendChild(itemDiv);
-    });
-
-    console.log('[DEBUG] Cart updated:', cart);
-}
-
-function removeFromCart(index) {
-    if (index >= 0 && index < cart.length) {
-        cart.splice(index, 1);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartDisplay();
-        if (cart.length === 0) hideCart();
-    }
-}
-
-function showCart() {
-    const cartElement = document.getElementById('cart');
-    if (cartElement) cartElement.style.display = 'block';
-}
-
-function hideCart() {
-    const cartElement = document.getElementById('cart');
-    if (cartElement) cartElement.style.display = 'none';
-}
-
-// Initialize cart display on page load
-document.addEventListener('DOMContentLoaded', () => {
-    updateCartDisplay();
-    if (cart.length > 0) showCart();
-});
-
-async function checkout() {
-    if (cart.length === 0) {
-        alert('Seu carrinho está vazio!');
-        return;
-    }
-
-    try {
-        // Prepare purchase data correctly
-        const purchaseData = cart.map(item => ({
-            produto: item.nome,
-            total: (item.preco * item.quantity).toFixed(2),
-            timestamp: new Date().toISOString()
-        }));
-
-        const response = await fetch("{% url 'save_purchase' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify(purchaseData)
-        });
-
-        if (response.ok) {
-            cart = [];
-            updateCartDisplay();
-            document.getElementById('cart').style.display = 'none';
-            $('#successModal').modal('show');
-            
-            if (window.location.pathname === "{% url 'purchase_history' %}") {
-                window.location.reload();
+        function addToCart(nome, preco) {
+            const existingItem = cart.find(item => item.nome === nome);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ nome, preco, quantity: 1 });
             }
-        } else {
-            throw new Error('Failed to save purchase');
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartDisplay();
+            showCart();
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Erro ao salvar compra. Tente novamente.');
-    }
-}
 
-function toggleCart() {
-    const cartElement = document.getElementById('cart');
-    cartElement.style.display = cartElement.style.display === 'none' ? 'block' : 'none'; // Toggle visibility
-}
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            cartItems.innerHTML = '';
+            cart.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                itemDiv.innerHTML = `
+                    <div>
+                        ${item.nome} <br>
+                        <small>$${item.preco.toFixed(2)} x ${item.quantity}</small>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="removeFromCart(${index})">X</button>
+                `;
+                cartItems.appendChild(itemDiv);
+            });
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartDisplay();
+            if (cart.length === 0) hideCart();
+        }
+
+        function showCart() {
+            document.getElementById('cart').style.display = 'block';
+        }
+
+        function hideCart() {
+            document.getElementById('cart').style.display = 'none';
+        }
+
+        function toggleCart() {
+            const cartElement = document.getElementById('cart');
+            cartElement.style.display = cartElement.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                alert('Seu carrinho está vazio!');
+                return;
+            }
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartDisplay();
+            alert('Item comprado com sucesso!');
+            hideCart();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartDisplay();
+            if (cart.length > 0) showCart();
+        });
     </script>
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
-
-</html>
 </html>
