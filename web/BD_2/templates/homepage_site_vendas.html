@@ -19,6 +19,9 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             width: 250px; /* Set a fixed width for the cart */
             display: none; /* Initially hidden */
+            display: block !important;
+            opacity: 1 !important;
+            pointer-events: all !important;
         }
         .product-card {
             border: 1px solid #ccc;
@@ -93,70 +96,179 @@
             {% for equipamento in equipamentos %}
             <div class="col-md-4 mb-4">
                 <div class="product-card">
-                    <div class="product-image">🛠️</div> 
-                    <h5 class="card-title">{{ equipamento.nome_equip }}</h5> <!-- Ensure this is the name -->
-                    <p class="card-text"><strong>Price:</strong> ${{ equipamento.custo_equip }}</p> <!-- Ensure this is the price -->
-                    <button class="btn btn-primary" onclick="addToCart('{{ equipamento.nome_equip|escapejs }}', {{ equipamento.custo_equip }})">Comprar</button>
+                    <div class="product-image">🛠️</div>
+                    <h5 class="card-title">{{ equipamento.nome_equip }}</h5>
+                    <p class="card-text"><strong>Price:</strong> ${{ equipamento.custo_equip }}</p>
+                    <button class="btn btn-primary" 
+                            onclick="addToCart('{{ equipamento.nome_equip|escapejs }}', {{ equipamento.custo_equip }})">
+                        Comprar
+                    </button>
                 </div>
             </div>
             {% endfor %}
         </div>
-                
+            <!-- Add this modal near the end of the body before scripts -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">Compra Feita com Sucesso</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Sua compra foi realizada com sucesso! Você pode visualizar seu histórico de compras na página de Histórico de Compras.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+        </div>
     </div>
+</div>
 
     <script>
+// Cart initialization with persistence
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
 function addToCart(nome, preco) {
-    console.log(`Adding to cart: ${nome}, Price: $${preco}`); // Debugging line
+    console.log('[DEBUG] Adding to cart:', nome, preco);
     
-    // Check if the item is already in the cart
-    const existingItem = cart.find(item => item.nome === nome);
-    if (existingItem) {
-        existingItem.quantity += 1; // Increment quantity if already in cart
-    } else {
-        cart.push({ nome, preco, quantity: 1 }); // Add new item to cart
+    // Validate inputs
+    if (typeof nome !== 'string' || nome.trim() === '') {
+        console.error('Invalid product name:', nome);
+        return;
     }
     
-    console.log(cart); // Debugging line to show cart contents
-    updateCartDisplay();
-    
-    // Automatically show the cart when an item is added
-    document.getElementById('cart').style.display = 'block';
-}
+    const numericPreco = Number(preco);
+    if (isNaN(numericPreco)) {
+        console.error('Invalid price value:', preco);
+        return;
+    }
 
+    // Normalize product name for comparison
+    const normalizedNome = nome.trim().toLowerCase();
+    
+    // Find existing item
+    const existingIndex = cart.findIndex(item => 
+        item.nome.trim().toLowerCase() === normalizedNome
+    );
+
+    if (existingIndex > -1) {
+        cart[existingIndex].quantity += 1;
+    } else {
+        cart.push({
+            nome: nome.trim(),
+            preco: numericPreco,
+            quantity: 1
+        });
+    }
+
+    // Persist to localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartDisplay();
+    showCart();
+}
 
 function updateCartDisplay() {
     const cartItems = document.getElementById('cart-items');
-    cartItems.innerHTML = ''; // Clear existing items
-    
-    cart.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'cart-item';
-        div.innerHTML = `${item.nome} - $${item.preco.toFixed(2)} (x${item.quantity})`; // Ensure price is formatted
-        cartItems.appendChild(div);
-    });
-}
-
-function removeFromCart(nome) {
-    cart = cart.filter(item => item.nome !== nome); // Remove item from cart
-    updateCartDisplay();
-    
-    // Hide cart if empty
-    if (cart.length === 0) {
-        document.getElementById('cart').style.display = 'none';
-    }
-}
-
-function checkout() {
-    if (cart.length === 0) {
-        alert('Your cart is empty!');
+    if (!cartItems) {
+        console.error('Cart items container not found!');
         return;
     }
-    alert('Item comprado com sucesso');
-    cart = []; // Clear the cart after purchase
+
+    // Clear existing items
+    cartItems.innerHTML = '';
+
+    // Create new items
+    cart.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'cart-item';
+        itemDiv.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    ${item.nome} 
+                    <br>
+                    <small>$${item.preco.toFixed(2)} x ${item.quantity}</small>
+                </div>
+                <button 
+                    class="btn btn-danger btn-sm" 
+                    onclick="removeFromCart(${index})"
+                >
+                    X
+                </button>
+            </div>
+        `;
+        cartItems.appendChild(itemDiv);
+    });
+
+    console.log('[DEBUG] Cart updated:', cart);
+}
+
+function removeFromCart(index) {
+    if (index >= 0 && index < cart.length) {
+        cart.splice(index, 1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartDisplay();
+        if (cart.length === 0) hideCart();
+    }
+}
+
+function showCart() {
+    const cartElement = document.getElementById('cart');
+    if (cartElement) cartElement.style.display = 'block';
+}
+
+function hideCart() {
+    const cartElement = document.getElementById('cart');
+    if (cartElement) cartElement.style.display = 'none';
+}
+
+// Initialize cart display on page load
+document.addEventListener('DOMContentLoaded', () => {
     updateCartDisplay();
-    
-    // Hide cart after checkout
-    document.getElementById('cart').style.display = 'none';
+    if (cart.length > 0) showCart();
+});
+
+async function checkout() {
+    if (cart.length === 0) {
+        alert('Seu carrinho está vazio!');
+        return;
+    }
+
+    try {
+        // Prepare purchase data correctly
+        const purchaseData = cart.map(item => ({
+            produto: item.nome,
+            total: (item.preco * item.quantity).toFixed(2),
+            timestamp: new Date().toISOString()
+        }));
+
+        const response = await fetch("{% url 'save_purchase' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(purchaseData)
+        });
+
+        if (response.ok) {
+            cart = [];
+            updateCartDisplay();
+            document.getElementById('cart').style.display = 'none';
+            $('#successModal').modal('show');
+            
+            if (window.location.pathname === "{% url 'purchase_history' %}") {
+                window.location.reload();
+            }
+        } else {
+            throw new Error('Failed to save purchase');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Erro ao salvar compra. Tente novamente.');
+    }
 }
 
 function toggleCart() {
@@ -165,9 +277,10 @@ function toggleCart() {
 }
     </script>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 
+</html>
 </html>

@@ -25,6 +25,9 @@ from django.contrib.auth import logout
 from django.shortcuts import redirect
 from datetime import datetime
 
+from django.views.decorators.csrf import csrf_exempt
+
+
 logger = logging.getLogger(__name__)
 
 def index(request):
@@ -2291,13 +2294,22 @@ def comprar(request, nome_equip, preco_equip, total_equip):
     
 
 def purchase_history(request):
-    username = request.session.get('username')
-    if username:
-        purchases = Purchase.objects.using('mongodb').filter(username=username)
-        return render(request, 'purchase_history.html', {'purchases': purchases})
-    else:
-        return HttpResponse('Usuário não autenticado.')
+    # Retrieve and format purchases
+    purchases = request.session.get('purchases', [])
     
+    # Formatting for display
+    formatted_purchases = []
+    for purchase in reversed(purchases):  # Show latest first
+        formatted_purchases.append({
+            'produto': purchase['produto'],
+            'total': f"${float(purchase['total']):.2f}",
+            'timestamp': purchase['timestamp']
+        })
+    
+    return render(request, 'purchase_history.html', {
+        'purchases': formatted_purchases
+    })
+
 def dashboard(request):
     # Ensure the user is authenticated and has the right permissions
     id_nivel = LocalStorage.get_id_nivel(request)
@@ -2382,3 +2394,44 @@ def logout_view(request):
     logout(request)  # This will log the user out
     return redirect('login_site_vendas')  # Redirect to the login page after logout
 
+@csrf_exempt  # Use this only if you are not using CSRF tokens in your AJAX requests
+def save_purchase(request):
+    if request.method == 'POST':
+        try:
+            # Get existing purchases from session
+            purchases = request.session.get('purchases', [])
+            
+            # Add new purchases
+            new_purchases = json.loads(request.body)
+            for purchase in new_purchases:
+                purchases.append({
+                    'produto': purchase['produto'],
+                    'total': "{:.2f}".format(float(purchase['total'])),
+                    'timestamp': timezone.localtime().strftime('%d/%m/%Y %H:%M:%S')
+                })
+            
+            # Save back to session
+            request.session['purchases'] = purchases
+            request.session.modified = True  # Critical for session updates
+            
+            return JsonResponse({'status': 'success', 'count': len(purchases)})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    return JsonResponse({'status': 'error'}, status=400)
+
+def purchase_history(request):
+    # Retrieve and format purchases
+    purchases = request.session.get('purchases', [])
+    
+    # Formatting for display
+    formatted_purchases = []
+    for purchase in reversed(purchases):  # Show latest first
+        formatted_purchases.append({
+            'produto': purchase['produto'],
+            'total': f"${float(purchase['total']):.2f}",
+            'timestamp': purchase['timestamp']
+        })
+    
+    return render(request, 'purchase_history.html', {
+        'purchases': formatted_purchases
+    })

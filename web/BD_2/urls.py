@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from BD_2 import views
-from .views import logout_view
+from .views import logout_view, dashboard, purchase_history, save_purchase
 
 urlpatterns = [
     path('', view=views.index, name='index'),
@@ -117,4 +117,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
 
     path('logout/', logout_view, name='logout'),
+
+    path('purchase_history/', purchase_history, name='purchase_history'),
+    path('save_purchase/', save_purchase, name='save_purchase'),  # New URL for saving purchases
 ]
